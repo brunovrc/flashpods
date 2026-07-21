@@ -532,11 +532,31 @@
   .ci-rm { color: var(--subtle); font-size: 16px; transition: color var(--tr); padding: 8px; margin: -8px; }
   .ci-rm:hover { color: #c84040; }
   .cart-foot { padding: 20px 24px; border-top: 1px solid var(--border); flex-shrink: 0; }
+  .cart-zone { margin-bottom: 16px; }
+  .cart-zone-label {
+    font-size: 12px; color: var(--muted); letter-spacing: .04em;
+    text-transform: uppercase; display: block; margin-bottom: 8px;
+  }
+  .zone-pills { display: flex; gap: 8px; }
+  .zone-pill {
+    flex: 1; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 8px 10px; text-align: center; cursor: pointer; background: none;
+    font-family: var(--font-b); transition: all var(--tr);
+  }
+  .zone-pill:hover { border-color: var(--border-em); }
+  .zone-pill.active { border-color: var(--blue); background: var(--blue-dim); }
+  .zone-pill-name { font-size: 13px; font-weight: 600; color: var(--text); display: block; }
+  .zone-pill.active .zone-pill-name { color: var(--blue); }
+  .zone-pill-fee { font-size: 11px; color: var(--muted); display: block; margin-top: 2px; }
   .cart-total-row {
     display: flex; justify-content: space-between; align-items: baseline;
     margin-bottom: 6px;
   }
+  .cart-total-row-final {
+    margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--border);
+  }
   .cart-total-label { font-size: 13px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+  .cart-line-val { font-size: 14px; font-weight: 600; color: var(--text); }
   .cart-total-val { font-family: var(--font-d); font-size: 22px; font-weight: 800; color: var(--blue); }
   .cart-disclaimer {
     font-size: 12px; color: var(--subtle); margin: 10px 0 18px;
@@ -690,7 +710,7 @@
   /* ── FOOTER ──────────────────────────────────────────── */
   #footer { background: var(--surface); border-top: 1px solid var(--border); padding: 72px 0 32px; }
   .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1.3fr 1fr; gap: 48px; margin-bottom: 52px; }
-  .footer-logo { height: 48px; width: auto; opacity: .92; }
+  .footer-logo { height: 76px; width: auto; opacity: .96; }
   .footer-tagline { font-size: 13.5px; color: var(--muted); margin-top: 14px; font-weight: 300; line-height: 1.7; max-width: 220px; }
   .footer-socials { display: flex; gap: 10px; margin-top: 20px; }
   .footer-social-link { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-em); background: var(--card); transition: border-color var(--tr), background var(--tr); }
@@ -1030,8 +1050,9 @@
         <h3>Entrega com motoboy</h3>
         <ul>
           <li>Informe o endereço completo no formulário</li>
-          <li>Escolha se a loja solicita o motoboy ou se você mesmo solicita</li>
-          <li>Valor do frete varia conforme a localização</li>
+          <li>Nossos motoboys levam até você — sem custo extra pra combinar</li>
+          <li><strong>Maringá:</strong> entrega grátis</li>
+          <li><strong>Sarandi:</strong> taxa de R$ 15</li>
           <li>Tudo confirmado pelo WhatsApp antes do envio</li>
         </ul>
       </div>
@@ -1146,8 +1167,8 @@
 
       <!-- Coluna 1: Marca -->
       <div>
-        <img src="./logo.png" alt="Flash Pods" class="footer-logo">
-        <p class="footer-tagline">Narguile, essências e acessórios.<br>Pedido pelo WhatsApp, simples assim.</p>
+        <img src="./logo-footer.png" alt="Flash Pods" class="footer-logo">
+        <p class="footer-tagline">Pods descartáveis e não descartáveis.<br>Pedido pelo WhatsApp, simples assim.</p>
         <div class="footer-socials">
           <a href="https://wa.me/5544997573617" class="footer-social-link" aria-label="WhatsApp" target="_blank" rel="noopener">
             <img src="https://cdn.simpleicons.org/whatsapp/0045F1" alt="WhatsApp" width="16" height="16">
@@ -1236,7 +1257,28 @@
   </div>
   <div class="cart-body" id="cart-body"></div>
   <div class="cart-foot" id="cart-foot" style="display:none">
+    <div class="cart-zone">
+      <span class="cart-zone-label">Onde você está?</span>
+      <div class="zone-pills" role="radiogroup" aria-label="Cidade de entrega">
+        <button type="button" class="zone-pill" data-zone="maringa">
+          <span class="zone-pill-name">Maringá</span>
+          <span class="zone-pill-fee">Grátis</span>
+        </button>
+        <button type="button" class="zone-pill" data-zone="sarandi">
+          <span class="zone-pill-name">Sarandi</span>
+          <span class="zone-pill-fee">R$ 15</span>
+        </button>
+      </div>
+    </div>
     <div class="cart-total-row">
+      <span class="cart-total-label">Subtotal</span>
+      <span class="cart-line-val" id="cart-subtotal">R$&nbsp;0,00</span>
+    </div>
+    <div class="cart-total-row">
+      <span class="cart-total-label">Frete</span>
+      <span class="cart-line-val" id="cart-fee">Grátis</span>
+    </div>
+    <div class="cart-total-row cart-total-row-final">
       <span class="cart-total-label">Total estimado</span>
       <span class="cart-total-val" id="cart-total">R$&nbsp;0,00</span>
     </div>
@@ -1271,6 +1313,29 @@
     <div class="co-summary">
       <span class="co-sum-title">Resumo do pedido</span>
       <div id="co-items"></div>
+      <div class="co-sum-sep"></div>
+      <div class="cart-zone">
+        <span class="cart-zone-label">Onde você está?</span>
+        <div class="zone-pills" role="radiogroup" aria-label="Cidade de entrega">
+          <button type="button" class="zone-pill" data-zone="maringa">
+            <span class="zone-pill-name">Maringá</span>
+            <span class="zone-pill-fee">Grátis</span>
+          </button>
+          <button type="button" class="zone-pill" data-zone="sarandi">
+            <span class="zone-pill-name">Sarandi</span>
+            <span class="zone-pill-fee">R$ 15</span>
+          </button>
+        </div>
+        <span class="error-msg" id="err-zone">Selecione a cidade de entrega</span>
+      </div>
+      <div class="co-sum-item">
+        <span>Subtotal</span>
+        <span id="co-subtotal">R$&nbsp;0,00</span>
+      </div>
+      <div class="co-sum-item">
+        <span>Frete</span>
+        <span id="co-fee">Grátis</span>
+      </div>
       <div class="co-sum-sep"></div>
       <div class="co-sum-item co-sum-total">
         <span>Total estimado</span>
@@ -1319,25 +1384,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="f-cidade">Cidade</label>
-          <input type="text" id="f-cidade" name="cidade" placeholder="Nome da cidade">
-        </div>
-        <div class="form-group">
           <label class="form-label" for="f-ref">Ponto de referência</label>
           <input type="text" id="f-ref" name="referencia" placeholder="Próximo a...">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Motoboy</label>
-          <div class="radio-group" role="radiogroup" aria-label="Quem solicita o motoboy">
-            <label class="radio-option">
-              <input type="radio" name="motoboy" value="loja" checked>
-              <span class="radio-label" style="font-size:12px">Loja solicita</span>
-            </label>
-            <label class="radio-option">
-              <input type="radio" name="motoboy" value="cliente">
-              <span class="radio-label" style="font-size:12px">Eu mesmo solicito</span>
-            </label>
-          </div>
         </div>
       </div>
 
@@ -1429,12 +1477,19 @@ const CAT_ICONS = {
 };
 
 /* ─────────────────────────────────────────────────────────
+   ENTREGA — TAXA FIXA POR CIDADE
+───────────────────────────────────────────────────────── */
+const DELIVERY_FEES = { maringa: 0, sarandi: 15 };
+const ZONE_NAMES = { maringa: 'Maringá', sarandi: 'Sarandi' };
+
+/* ─────────────────────────────────────────────────────────
    STATE
 ───────────────────────────────────────────────────────── */
 /* Prevents browser from restoring the previous scroll position on refresh */
 history.scrollRestoration = 'manual';
 
 const CART_KEY = 'flashpods_cart';
+const ZONE_KEY = 'flashpods_zone';
 
 function loadCart() {
   try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
@@ -1445,11 +1500,23 @@ function saveCart() {
   catch {}
 }
 
+function loadZone() {
+  try {
+    const z = localStorage.getItem(ZONE_KEY);
+    return DELIVERY_FEES.hasOwnProperty(z) ? z : null;
+  } catch { return null; }
+}
+function saveZone() {
+  try { localStorage.setItem(ZONE_KEY, state.deliveryZone); }
+  catch {}
+}
+
 const state = {
   cart: loadCart(),
   activeCategory: 'all',
   cartOpen: false,
   checkoutOpen: false,
+  deliveryZone: loadZone(),
   ageVerified: sessionStorage.getItem('ageVerified') === 'true',
 };
 
@@ -1676,6 +1743,51 @@ function removeFromCart(productId) {
   updateCartBadge();
 }
 
+/* ─────────────────────────────────────────────────────────
+   ENTREGA — CIDADE E FRETE
+───────────────────────────────────────────────────────── */
+function getTotals() {
+  const subtotal = state.cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const fee = state.deliveryZone ? DELIVERY_FEES[state.deliveryZone] : 0;
+  return { subtotal, fee, total: subtotal + fee };
+}
+
+function feeLabel(fee) {
+  if (!state.deliveryZone) return 'Selecione a cidade';
+  return fee > 0 ? fmt(fee) : 'Grátis';
+}
+
+function renderZonePills() {
+  $$('.zone-pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.zone === state.deliveryZone);
+  });
+}
+
+function renderTotals() {
+  const { subtotal, fee, total } = getTotals();
+  if ($('cart-subtotal')) $('cart-subtotal').textContent = fmt(subtotal);
+  if ($('cart-fee')) $('cart-fee').textContent = feeLabel(fee);
+  if ($('cart-total')) $('cart-total').textContent = fmt(total);
+  if ($('co-subtotal')) $('co-subtotal').textContent = fmt(subtotal);
+  if ($('co-fee')) $('co-fee').textContent = feeLabel(fee);
+  if ($('co-total')) $('co-total').textContent = fmt(total);
+  renderZonePills();
+}
+
+function setZone(zone) {
+  state.deliveryZone = zone;
+  saveZone();
+  renderTotals();
+  if ($('err-zone')) $('err-zone').classList.remove('show');
+}
+
+function initDeliveryZone() {
+  $$('.zone-pill').forEach(btn => {
+    btn.addEventListener('click', () => setZone(btn.dataset.zone));
+  });
+  renderTotals();
+}
+
 function renderCart() {
   const body = $('cart-body');
   const foot = $('cart-foot');
@@ -1693,7 +1805,6 @@ function renderCart() {
     return;
   }
 
-  const total = state.cart.reduce((s, i) => s + i.price * i.qty, 0);
   const totalQty = state.cart.reduce((s, i) => s + i.qty, 0);
 
   state.cart.forEach(item => {
@@ -1723,8 +1834,7 @@ function renderCart() {
     body.appendChild(el);
   });
 
-  $('cart-total').textContent = fmt(total);
-  $('co-total').textContent = fmt(total);
+  renderTotals();
   $('cb-qty').textContent = totalQty;
   meta.textContent = `${totalQty} ${totalQty === 1 ? 'item' : 'itens'}`;
   foot.style.display = 'block';
@@ -1777,7 +1887,6 @@ function closeCheckout() {
 function renderCheckoutSummary() {
   const container = $('co-items');
   container.innerHTML = '';
-  const total = state.cart.reduce((s, i) => s + i.price * i.qty, 0);
 
   state.cart.forEach(item => {
     const row = document.createElement('div');
@@ -1786,7 +1895,7 @@ function renderCheckoutSummary() {
     container.appendChild(row);
   });
 
-  $('co-total').textContent = fmt(total);
+  renderTotals();
 }
 
 function getFormData() {
@@ -1806,6 +1915,10 @@ function validateForm(data) {
   setErr('f-nome', 'err-nome', !data.nome?.trim());
   setErr('f-tel', 'err-tel', !data.telefone?.trim());
 
+  const zoneOk = !!state.deliveryZone;
+  $('err-zone').classList.toggle('show', !zoneOk);
+  if (!zoneOk) valid = false;
+
   return valid;
 }
 
@@ -1814,16 +1927,17 @@ function buildWhatsAppMessage(data) {
     `*${i.name}* — Qtd: ${i.qty} — ${fmt(i.price * i.qty)}`
   ).join('\n');
 
-  const total = state.cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const { subtotal, fee, total } = getTotals();
+  const zoneName = state.deliveryZone ? ZONE_NAMES[state.deliveryZone] : '—';
+  const feeLine = state.deliveryZone ? (fee > 0 ? fmt(fee) : 'Grátis') : 'A confirmar';
 
   const entregaLines = `
 *ENDEREÇO DE ENTREGA*
 Rua/Av: ${data.rua || '—'}, ${data.numero || '—'}
 Complemento: ${data.complemento || 'Não informado'}
 Bairro: ${data.bairro || '—'}
-Cidade: ${data.cidade || '—'}
-Referência: ${data.referencia || 'Não informado'}
-Motoboy: ${data.motoboy === 'loja' ? 'Loja solicita o motoboy' : 'Cliente solicita o próprio motoboy'}`;
+Cidade: ${zoneName}
+Referência: ${data.referencia || 'Não informado'}`;
 
   const obsLine = data.obs?.trim() ? `\n\n*OBSERVAÇÕES*\n${data.obs.trim()}` : '';
 
@@ -1836,6 +1950,12 @@ Maior de 18 anos: Sim
 
 *PRODUTOS*
 ${items}
+
+*SUBTOTAL*
+${fmt(subtotal)}
+
+*FRETE (${zoneName})*
+${feeLine}
 
 *TOTAL ESTIMADO*
 ${fmt(total)}
@@ -2064,6 +2184,7 @@ function init() {
   buildCategoryFilter();
   renderProducts();
   renderCart();
+  initDeliveryZone();
   updateCartBadge();
   initScrollReveal();
   observeCards();

@@ -51,7 +51,7 @@
       "addressRegion": "PR",
       "addressCountry": "BR"
     },
-    "areaServed": "Maringá - PR",
+    "areaServed": ["Maringá - PR", "Sarandi - PR"],
     "openingHoursSpecification": [
       { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday"], "opens": "10:00", "closes": "20:00" },
       { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Friday","Saturday"], "opens": "10:00", "closes": "20:30" },
@@ -627,16 +627,6 @@
   .error-msg { font-size: 12px; color: #c84040; margin-top: 4px; display: none; }
   .error-msg.show { display: block; }
 
-  /* ── MOBILE CART BAR ─────────────────────────────────── */
-  #cart-bar {
-    position: fixed; bottom: 0; left: 0; right: 0; z-index: 150;
-    background: var(--surface); border-top: 1px solid var(--border);
-    padding: 12px 20px; display: none;
-    align-items: center; justify-content: space-between; gap: 12px;
-  }
-  #cart-bar.show { display: flex; }
-  .cb-info { font-size: 13px; }
-  .cb-qty { color: var(--blue); font-weight: 600; }
 
   /* ── ENTREGA ─────────────────────────────────────────── */
   #entrega {
@@ -709,7 +699,7 @@
 
   /* ── FOOTER ──────────────────────────────────────────── */
   #footer { background: var(--surface); border-top: 1px solid var(--border); padding: 72px 0 32px; }
-  .footer-grid { display: grid; grid-template-columns: 1.4fr 1fr 1.3fr 1fr; gap: 48px; margin-bottom: 52px; }
+  .footer-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 48px; margin-bottom: 52px; }
   .footer-logo { height: 76px; width: auto; opacity: .96; }
   .footer-tagline { font-size: 13.5px; color: var(--muted); margin-top: 14px; font-weight: 300; line-height: 1.7; max-width: 220px; }
   .footer-socials { display: flex; gap: 10px; margin-top: 20px; }
@@ -720,11 +710,6 @@
   .footer-col-links { display: flex; flex-direction: column; gap: 11px; }
   .footer-col-links a { font-size: 13.5px; color: var(--muted); text-decoration: none; transition: color var(--tr); }
   .footer-col-links a:hover { color: var(--text); }
-  .footer-address { font-size: 13px; color: var(--muted); line-height: 1.75; margin-bottom: 20px; font-style: normal; }
-  .footer-hours { font-size: 12.5px; color: var(--muted); }
-  .footer-hours-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(37,37,37,.5); gap: 12px; }
-  .footer-hours-row:last-child { border-bottom: none; }
-  .footer-hours-row span:last-child { color: var(--text); font-weight: 500; white-space: nowrap; }
   .footer-phone-num { font-size: 20px; font-weight: 600; color: var(--text); margin: 6px 0 4px; letter-spacing: -.02em; font-family: var(--font-b); }
   .footer-phone-sub { font-size: 12.5px; color: var(--subtle); margin-bottom: 18px; line-height: 1.55; }
   .footer-wa-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: rgba(37,211,102,.1); border: 1px solid rgba(37,211,102,.28); border-radius: 8px; color: #2fce6e; font-size: 13.5px; font-weight: 500; text-decoration: none; transition: background var(--tr), border-color var(--tr); font-family: var(--font-b); }
@@ -796,7 +781,6 @@
     .menu-toggle { display: block; }
     :root { --cart-w: 100vw; }
     .form-row { grid-template-columns: 1fr; }
-    body.has-cart { padding-bottom: 74px; }
     #checkout-overlay { padding: 0; align-items: flex-end; }
     .checkout-modal { border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 92vh; overflow-y: auto; }
   }
@@ -1042,7 +1026,7 @@
   <div class="container">
     <span class="section-tag reveal">Logística</span>
     <h2 class="section-title reveal">Entrega</h2>
-    <p class="section-sub reveal">Entregamos em toda Maringá - PR. A equipe confirma o pedido e combina os detalhes pelo WhatsApp.</p>
+    <p class="section-sub reveal">Entregamos em Maringá e Sarandi - PR. A equipe confirma o pedido e combina os detalhes pelo WhatsApp.</p>
     <div class="divider reveal"></div>
     <div class="entrega-grid">
       <div class="entrega-card reveal">
@@ -1092,7 +1076,7 @@
           <div class="loc-row-content">
             <h4>Área de entrega</h4>
             <p id="address-display" style="font-size:17px;line-height:1.65">
-              Maringá - PR
+              Maringá - PR e Sarandi - PR
             </p>
           </div>
         </div>
@@ -1204,20 +1188,7 @@
         </nav>
       </div>
 
-      <!-- Coluna 3: Área de entrega e horários -->
-      <div>
-        <p class="footer-col-title">Área de entrega</p>
-        <address class="footer-address">
-          Maringá - PR
-        </address>
-        <div class="footer-hours">
-          <div class="footer-hours-row"><span>Seg – Qui</span><span>10h – 20h</span></div>
-          <div class="footer-hours-row"><span>Sex – Sáb</span><span>10h – 20h30</span></div>
-          <div class="footer-hours-row"><span>Domingo</span><span>11h – 17h</span></div>
-        </div>
-      </div>
-
-      <!-- Coluna 4: Contato -->
+      <!-- Coluna 3: Contato -->
       <div>
         <p class="footer-col-title">Contato</p>
         <p class="footer-phone-num">(44) 99757-3617</p>
@@ -1290,14 +1261,6 @@
     </button>
   </div>
 </aside>
-
-<!-- MOBILE CART BAR -->
-<div id="cart-bar" role="complementary" aria-label="Resumo do carrinho">
-  <p class="cb-info"><span class="cb-qty" id="cb-qty">0</span> itens no carrinho</p>
-  <button class="btn btn-primary btn-sm" id="cb-open">
-    Ver pedido <i class="ph-arrow-right-bold"></i>
-  </button>
-</div>
 
 <!-- ══════════════════════════════════════════════════════
      CHECKOUT MODAL
@@ -1444,7 +1407,7 @@ const CONFIG = {
   whatsapp:   '5544997573617',
   nome:       'Flash Pods',
   instagram:  '@flashhpod',
-  endereco:   'Maringá - PR',
+  endereco:   'Maringá - PR e Sarandi - PR',
   siteUrl:    'https://seu-site.com',
   horarios:   'Seg–Sex: 10h às 20h · Sex–Sáb: 10h às 20h30 · Dom: 11h às 17h',
 };
@@ -1799,9 +1762,6 @@ function renderCart() {
     body.innerHTML = `<div class="cart-empty"><i class="ph-shopping-cart-bold"></i><p>Carrinho vazio.<br>Adicione produtos do catálogo.</p></div>`;
     foot.style.display = 'none';
     meta.textContent = '0 itens';
-    $('cb-qty').textContent = '0';
-    document.body.classList.remove('has-cart');
-    $('cart-bar').classList.remove('show');
     return;
   }
 
@@ -1835,13 +1795,8 @@ function renderCart() {
   });
 
   renderTotals();
-  $('cb-qty').textContent = totalQty;
   meta.textContent = `${totalQty} ${totalQty === 1 ? 'item' : 'itens'}`;
   foot.style.display = 'block';
-  document.body.classList.add('has-cart');
-
-  // Mobile bar
-  if (window.innerWidth <= 768) $('cart-bar').classList.add('show');
 }
 
 function updateCartBadge() {
@@ -1998,7 +1953,6 @@ function initEvents() {
   // Cart open/close
   $('cart-btn').addEventListener('click', openCart);
   if ($('cart-fab')) $('cart-fab').addEventListener('click', openCart);
-  $('cb-open').addEventListener('click', openCart);
   $('cart-close').addEventListener('click', closeCart);
   $('cart-overlay').addEventListener('click', closeCart);
 
@@ -2023,76 +1977,6 @@ function initEvents() {
       else if (state.cartOpen) closeCart();
     }
   });
-}
-
-/* ─────────────────────────────────────────────────────────
-   HERO CAROUSEL
-───────────────────────────────────────────────────────── */
-function initHeroCarousel() {
-  const stage = $('hc-stage');
-  if (!stage) return;
-  const imgs = stage.querySelectorAll('.hc-img');
-  const dotsEl = $('hc-dots');
-  const n = imgs.length;
-  let active = 0;
-  let timer = null;
-
-  // Build dots
-  imgs.forEach((_, i) => {
-    const d = document.createElement('button');
-    d.className = 'hc-dot' + (i === 0 ? ' active' : '');
-    d.setAttribute('aria-label', `Foto ${i + 1}`);
-    d.addEventListener('click', () => goTo(i));
-    dotsEl.appendChild(d);
-  });
-
-  function getProps(idx) {
-    const gap = 56, stickUp = gap * 0.8;
-    const isLeft  = (active - 1 + n) % n === idx;
-    const isRight = (active + 1) % n === idx;
-    if (idx === active) return { z: 3, o: 1, t: 'translateX(0) translateY(0) scale(1) rotateY(0deg)' };
-    if (isLeft)  return { z: 2, o: 1, t: `translateX(-${gap}px) translateY(-${stickUp}px) scale(0.85) rotateY(14deg)` };
-    if (isRight) return { z: 2, o: 1, t: `translateX(${gap}px) translateY(-${stickUp}px) scale(0.85) rotateY(-14deg)` };
-    return { z: 1, o: 0, t: 'scale(0.7)' };
-  }
-
-  function render() {
-    imgs.forEach((img, i) => {
-      const p = getProps(i);
-      img.style.zIndex   = p.z;
-      img.style.opacity  = p.o;
-      img.style.transform = p.t;
-      img.classList.toggle('is-active', i === active);
-    });
-    dotsEl.querySelectorAll('.hc-dot').forEach((d, i) => d.classList.toggle('active', i === active));
-  }
-
-  function goTo(idx) {
-    active = ((idx % n) + n) % n;
-    render();
-    restartTimer();
-  }
-
-  function restartTimer() {
-    clearInterval(timer);
-    timer = setInterval(() => goTo(active + 1), 5000);
-  }
-
-  $('hc-prev').addEventListener('click', () => goTo(active - 1));
-  $('hc-next').addEventListener('click', () => goTo(active + 1));
-
-  // Touch/swipe
-  let touchX = null;
-  stage.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
-  stage.addEventListener('touchend', e => {
-    if (touchX === null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) goTo(dx < 0 ? active + 1 : active - 1);
-    touchX = null;
-  }, { passive: true });
-
-  render();
-  restartTimer();
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -2191,7 +2075,6 @@ function init() {
   initEvents();
   initFeatureCards();
   initMenubar();
-  initHeroCarousel();
 }
 
 document.addEventListener('DOMContentLoaded', init);

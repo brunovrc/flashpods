@@ -550,6 +550,15 @@
     font-size: 12px; color: var(--subtle); margin: 10px 0 18px;
     line-height: 1.55; text-align: center;
   }
+  .store-closed-note {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(145,152,172,.14); border: 1px solid var(--border-em);
+    border-radius: var(--radius); padding: 11px 14px;
+    font-size: 12.5px; font-weight: 500; color: var(--muted); margin-bottom: 12px;
+  }
+  .store-closed-note.hidden { display: none; }
+  .store-closed-note i { color: var(--subtle); font-size: 16px; flex-shrink: 0; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
 
   /* ── CHECKOUT MODAL ──────────────────────────────────── */
   #checkout-overlay {
@@ -1264,6 +1273,10 @@
     <p class="cart-disclaimer">
       Valores e disponibilidade confirmados pela equipe no WhatsApp após o envio do pedido.
     </p>
+    <div class="store-closed-note hidden" id="cart-closed-note">
+      <i class="ph-clock-bold"></i>
+      <span id="cart-closed-text">Loja fechada agora.</span>
+    </div>
     <button class="btn btn-primary btn-full btn-lg" id="checkout-btn">
       <i class="ph-whatsapp-logo-bold"></i> Finalizar pedido
     </button>
@@ -1406,6 +1419,10 @@
       </div>
 
       <div class="co-actions">
+        <div class="store-closed-note hidden" id="co-closed-note">
+          <i class="ph-clock-bold"></i>
+          <span id="co-closed-text">Loja fechada agora.</span>
+        </div>
         <button type="submit" class="btn btn-primary btn-full btn-lg" id="send-btn">
           <i class="ph-whatsapp-logo-bold"></i> Enviar pedido pelo WhatsApp
         </button>
@@ -1599,34 +1616,66 @@ function fmtHM(mins) {
   return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
 }
 
-function updateStoreStatus() {
-  const dot = $('status-dot');
-  const text = $('status-text');
-  if (!dot || !text) return;
-
+function getStoreStatus() {
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const [openM, closeM] = BUSINESS_HOURS[now.getDay()];
 
   if (nowMinutes >= openM && nowMinutes < closeM) {
-    dot.className = 'status-dot open';
-    text.textContent = `Loja aberta agora · Fecha às ${fmtHM(closeM)}`;
-    return;
+    return { isOpen: true, label: `Loja aberta agora · Fecha às ${fmtHM(closeM)}`, shortLabel: `Loja fechada agora.` };
   }
 
-  dot.className = 'status-dot closed';
   for (let i = 0; i < 8; i++) {
     const day = (now.getDay() + i) % 7;
     const [oM] = BUSINESS_HOURS[day];
     if (i === 0 && nowMinutes < oM) {
-      text.textContent = `Loja fechada agora · Abre hoje às ${fmtHM(oM)}`;
-      return;
+      return {
+        isOpen: false,
+        label: `Loja fechada agora · Abre hoje às ${fmtHM(oM)}`,
+        shortLabel: `Loja fechada agora — abre hoje às ${fmtHM(oM)}.`,
+      };
     }
     if (i > 0) {
-      const label = i === 1 ? 'amanhã' : WEEKDAY_NAMES[day];
-      text.textContent = `Loja fechada agora · Abre ${label} às ${fmtHM(oM)}`;
-      return;
+      const dayLabel = i === 1 ? 'amanhã' : WEEKDAY_NAMES[day];
+      return {
+        isOpen: false,
+        label: `Loja fechada agora · Abre ${dayLabel} às ${fmtHM(oM)}`,
+        shortLabel: `Loja fechada agora — abre ${dayLabel} às ${fmtHM(oM)}.`,
+      };
     }
+  }
+}
+
+function updateStoreStatus() {
+  const dot = $('status-dot');
+  const text = $('status-text');
+  const status = getStoreStatus();
+
+  if (dot && text) {
+    dot.className = status.isOpen ? 'status-dot open' : 'status-dot closed';
+    text.textContent = status.label;
+  }
+
+  updateOrderingAvailability(status);
+}
+
+function updateOrderingAvailability(status) {
+  status = status || getStoreStatus();
+
+  const cartNote = $('cart-closed-note');
+  const checkoutBtn = $('checkout-btn');
+  if (cartNote && checkoutBtn) {
+    cartNote.classList.toggle('hidden', status.isOpen);
+    $('cart-closed-text').textContent = status.shortLabel;
+    checkoutBtn.disabled = !status.isOpen;
+  }
+
+  const coNote = $('co-closed-note');
+  const sendBtn = $('send-btn');
+  if (coNote && sendBtn) {
+    coNote.classList.toggle('hidden', status.isOpen);
+    $('co-closed-text').textContent = status.shortLabel;
+    sendBtn.disabled = !status.isOpen;
   }
 }
 
@@ -1946,6 +1995,7 @@ function closeCart() {
 function openCheckout() {
   renderCheckoutSummary();
   handlePagamentoToggle();
+  updateOrderingAvailability();
   closeCart();
   $('checkout-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -2128,6 +2178,7 @@ function initEvents() {
   // Form submit
   $('checkout-form').addEventListener('submit', e => {
     e.preventDefault();
+    if (!getStoreStatus().isOpen) { updateOrderingAvailability(); return; }
     const data = getFormData();
     if (!validateForm(data)) return;
     const msg = buildWhatsAppMessage(data);

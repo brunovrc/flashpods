@@ -65,6 +65,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 
   <style>
   /* ── TOKENS ─────────────────────────────────────────── */
@@ -136,9 +137,24 @@
   .btn-sm { padding: 8px 16px; font-size: 13px; }
   .btn-full { width: 100%; }
 
+  /* ── STATUS DA LOJA ──────────────────────────────────── */
+  #status-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 101;
+    height: 34px; background: var(--surface); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 12.5px; font-weight: 600; color: var(--text); padding: 0 12px;
+    text-align: center;
+  }
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    background: var(--subtle);
+  }
+  .status-dot.open { background: #1FAE5C; box-shadow: 0 0 0 3px rgba(31,174,92,.18); }
+  .status-dot.closed { background: #9198AC; }
+
   /* ── HEADER ──────────────────────────────────────────── */
   #header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    position: fixed; top: 34px; left: 0; right: 0; z-index: 100;
     background: rgba(0,69,241,.96); backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(255,255,255,.12);
@@ -248,40 +264,11 @@
   }
   #cart-fab-count.hidden { display: none; }
 
-  /* ── AGE MODAL ───────────────────────────────────────── */
-  #age-modal {
-    position: fixed; inset: 0; z-index: 999;
-    background: rgba(5,5,5,.97);
-    display: flex; align-items: center; justify-content: center; padding: 24px;
-  }
-  #age-modal.hidden { display: none; }
-  .age-card {
-    background: var(--card); border: 1px solid var(--blue);
-    border-radius: var(--radius-lg); padding: 52px 44px;
-    max-width: 420px; width: 100%; text-align: center;
-    box-shadow: 0 0 60px rgba(0,69,241,.1);
-  }
-  .age-emblem {
-    width: 56px; height: 56px; border-radius: 50%;
-    border: 1px solid rgba(0,69,241,.35);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 28px; font-size: 24px; color: var(--blue);
-  }
-  .age-card h2 {
-    font-family: var(--font-d); font-size: 20px; font-weight: 700;
-    letter-spacing: 0; margin-bottom: 14px;
-  }
-  .age-card p {
-    font-size: 14px; color: var(--muted); line-height: 1.75; margin-bottom: 36px;
-    font-weight: 300;
-  }
-  .age-actions { display: flex; flex-direction: column; gap: 10px; }
-
   /* ── HERO ────────────────────────────────────────────── */
   /* Único trecho escuro do site — palco pro vídeo de fumaça. O resto é branco+azul. */
   #hero {
     min-height: 100vh; min-height: 100dvh; display: flex; align-items: center;
-    padding: 130px 0 90px; position: relative; overflow: hidden;
+    padding: 164px 0 90px; position: relative; overflow: hidden;
     background-color: #050A18; color: #F0EDE8;
   }
   #hero-video {
@@ -363,6 +350,7 @@
 
   /* ── COMO FUNCIONA ───────────────────────────────────── */
   #como-funciona {
+    scroll-margin-top: 146px;
     background: var(--surface);
     border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
   }
@@ -409,7 +397,7 @@
   }
 
   /* ── PRODUTOS ────────────────────────────────────────── */
-  #produtos { background: var(--bg); }
+  #produtos { background: var(--bg); scroll-margin-top: 146px; }
   .cat-filter {
     display: flex; gap: 8px; overflow-x: auto; flex-wrap: nowrap;
     padding-bottom: 4px; margin-bottom: 44px; scrollbar-width: none;
@@ -630,10 +618,30 @@
   .input-error { border-color: #c84040 !important; }
   .error-msg { font-size: 12px; color: #c84040; margin-top: 4px; display: none; }
   .error-msg.show { display: block; }
+  .pix-box {
+    background: var(--card); border: 1px solid var(--border-em);
+    border-radius: var(--radius-lg); padding: 20px; text-align: center;
+  }
+  .pix-label {
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    letter-spacing: .02em; margin-bottom: 14px;
+  }
+  .pix-qr { display: flex; justify-content: center; margin-bottom: 16px; }
+  .pix-qr svg { width: 180px; height: 180px; }
+  .pix-copy-row { display: flex; gap: 8px; }
+  .pix-copy-row input {
+    font-size: 12px; text-overflow: ellipsis; text-align: left;
+  }
+  .pix-copy-row .btn { flex-shrink: 0; }
+  .pix-hint {
+    font-size: 12px; color: var(--subtle); line-height: 1.6;
+    margin-top: 14px; text-align: left;
+  }
 
 
   /* ── ENTREGA ─────────────────────────────────────────── */
   #entrega {
+    scroll-margin-top: 146px;
     background: var(--surface);
     border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
   }
@@ -664,7 +672,7 @@
   .entrega-note strong { color: var(--text); }
 
   /* ── LOCALIZAÇÃO ─────────────────────────────────────── */
-  #localizacao { background: var(--bg); padding: 104px 0; }
+  #localizacao { background: var(--bg); padding: 104px 0; scroll-margin-top: 146px; }
   #localizacao > .container { max-width: 100%; padding: 0 clamp(32px, 5vw, 80px); }
   .loc-grid {
     display: flex; justify-content: center; max-width: 620px; margin: 0 auto;
@@ -759,9 +767,11 @@
     .header-inner { height: 72px; grid-template-columns: auto 1fr auto; }
     .header-logo img { height: 56px; }
     .header-nav { display: none; }
+    #status-bar { font-size: 11.5px; padding: 0 8px; }
+    #como-funciona, #produtos, #entrega, #localizacao { scroll-margin-top: 106px; }
     .header-nav.open {
       display: flex;
-      position: fixed; top: 72px; left: 0; right: 0;
+      position: fixed; top: 106px; left: 0; right: 0;
       background: rgba(0,69,241,.97);
       padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.14);
       z-index: 99;
@@ -844,7 +854,6 @@
     .hero-ctas { flex-direction: column; align-items: center; }
     .hero-age-note { justify-content: center; }
     .hero-video-right { display: none; }
-    .age-card { padding: 40px 24px; }
   }
 
   /* ── Very small screens (≤360px) ── */
@@ -861,22 +870,11 @@
 <body>
 
 <!-- ══════════════════════════════════════════════════════
-     MODAL DE MAIORIDADE
+     STATUS DA LOJA (aberta/fechada — atualiza sozinho)
 ══════════════════════════════════════════════════════ -->
-<div id="age-modal" role="dialog" aria-modal="true" aria-label="Verificação de idade">
-  <div class="age-card">
-    <div class="age-emblem"><i class="ph-warning-bold"></i></div>
-    <h2>Acesso restrito</h2>
-    <p>
-      Este site é exclusivo para maiores de 18 anos.<br>
-      A venda de produtos de tabaco é proibida para menores.<br><br>
-      Você confirma que tem 18 anos ou mais?
-    </p>
-    <div class="age-actions">
-      <button class="btn btn-primary btn-lg" id="age-yes">Tenho 18 anos ou mais</button>
-      <button class="btn btn-ghost" id="age-no">Não tenho 18 anos</button>
-    </div>
-  </div>
+<div id="status-bar" role="status" aria-live="polite">
+  <span id="status-dot" class="status-dot"></span>
+  <span id="status-text">Verificando horário de funcionamento…</span>
 </div>
 
 <!-- ══════════════════════════════════════════════════════
@@ -957,7 +955,7 @@
           <em>pode confiar.</em>
         </h1>
         <p class="hero-sub">
-          Escolha seus pods, monte o pedido no site e nossa equipe confirma tudo pelo WhatsApp. Entrega em Maringá - PR.
+          Escolha seus pods, monte o pedido no site e nossa equipe confirma tudo pelo WhatsApp. Entrega em Maringá e Sarandi em 30 a 50 minutos.
         </p>
         <div class="hero-ctas">
           <a href="#produtos" class="btn btn-primary btn-lg">
@@ -1042,6 +1040,7 @@
         <i class="entrega-icon ph-motorcycle-bold"></i>
         <h3>Entrega com motoboy</h3>
         <ul>
+          <li><strong>Tempo estimado:</strong> 30 a 50 minutos</li>
           <li>Informe o endereço completo no formulário</li>
           <li>Nossos motoboys levam até você — sem custo extra pra combinar</li>
           <li><strong>Maringá:</strong> entrega grátis</li>
@@ -1053,7 +1052,7 @@
         <i class="entrega-icon ph-clock-bold"></i>
         <h3>Horário de atendimento</h3>
         <ul>
-          <li>Seg a sex: 10h – 20h</li>
+          <li>Seg a qui: 10h – 20h</li>
           <li>Sex e sáb: 10h – 20h30</li>
           <li>Dom: 11h – 17h</li>
           <li>Pedidos recebidos fora do horário são confirmados na abertura</li>
@@ -1384,6 +1383,18 @@
           <label class="form-label" for="f-troco">Precisa de troco para quanto?</label>
           <input type="text" id="f-troco" name="troco" placeholder="Ex: R$ 100 (deixe em branco se não precisar)">
         </div>
+        <div class="form-group" id="pix-payment" style="display:none">
+          <div class="pix-box">
+            <p class="pix-label">Pague com Pix — valor exato do pedido</p>
+            <div id="pix-qr" class="pix-qr"></div>
+            <label class="form-label" for="pix-code">Pix copia e cola</label>
+            <div class="pix-copy-row">
+              <input type="text" id="pix-code" readonly>
+              <button type="button" class="btn btn-outline btn-sm" id="pix-copy-btn">Copiar</button>
+            </div>
+            <p class="pix-hint">Pague pelo app do seu banco. Depois, toque em "Já paguei" abaixo pra enviar o comprovante no WhatsApp.</p>
+          </div>
+        </div>
       </div>
 
       <!-- Observações -->
@@ -1422,7 +1433,10 @@ const CONFIG = {
   instagram:  '@flashhpod',
   endereco:   'Maringá - PR e Sarandi - PR',
   siteUrl:    'https://seu-site.com',
-  horarios:   'Seg–Sex: 10h às 20h · Sex–Sáb: 10h às 20h30 · Dom: 11h às 17h',
+  horarios:   'Seg–Qui: 10h às 20h · Sex–Sáb: 10h às 20h30 · Dom: 11h às 17h',
+  pixKey:     '+5544984134092',
+  pixName:    'LUIS CLAUDIO',
+  pixCity:    'MARINGA',
 };
 
 /* ─────────────────────────────────────────────────────────
@@ -1459,6 +1473,62 @@ const DELIVERY_FEES = { maringa: 0, sarandi: 15 };
 const ZONE_NAMES = { maringa: 'Maringá', sarandi: 'Sarandi' };
 
 /* ─────────────────────────────────────────────────────────
+   PIX — QR Code + copia-e-cola (BR Code / EMVCo), sem backend
+───────────────────────────────────────────────────────── */
+function pixTLV(id, value) {
+  const len = String(value.length).padStart(2, '0');
+  return `${id}${len}${value}`;
+}
+
+function pixCRC16(payload) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < payload.length; i++) {
+    crc ^= payload.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      crc = (crc & 0x8000) ? ((crc << 1) ^ 0x1021) : (crc << 1);
+      crc &= 0xFFFF;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, '0');
+}
+
+function buildPixPayload(amount) {
+  const merchantAccount = pixTLV('00', 'br.gov.bcb.pix') + pixTLV('01', CONFIG.pixKey);
+  let payload =
+    pixTLV('00', '01') +
+    pixTLV('26', merchantAccount) +
+    pixTLV('52', '0000') +
+    pixTLV('53', '986') +
+    pixTLV('54', amount.toFixed(2)) +
+    pixTLV('58', 'BR') +
+    pixTLV('59', CONFIG.pixName.slice(0, 25)) +
+    pixTLV('60', CONFIG.pixCity.slice(0, 15)) +
+    pixTLV('62', pixTLV('05', '***'));
+  payload += '6304';
+  return payload + pixCRC16(payload);
+}
+
+function renderPixPayment() {
+  const holder = $('pix-qr');
+  if (!holder) return;
+  const { total } = getTotals();
+  if (total <= 0) return;
+
+  const payload = buildPixPayload(total);
+  $('pix-code').value = payload;
+
+  holder.innerHTML = '';
+  if (typeof qrcode !== 'function') {
+    holder.textContent = 'Não foi possível carregar o QR Code — use o código copia e cola abaixo.';
+    return;
+  }
+  const qr = qrcode(0, 'M');
+  qr.addData(payload);
+  qr.make();
+  holder.innerHTML = qr.createSvgTag({ cellSize: 4, margin: 2 });
+}
+
+/* ─────────────────────────────────────────────────────────
    STATE
 ───────────────────────────────────────────────────────── */
 /* Prevents browser from restoring the previous scroll position on refresh */
@@ -1493,7 +1563,6 @@ const state = {
   cartOpen: false,
   checkoutOpen: false,
   deliveryZone: loadZone(),
-  ageVerified: sessionStorage.getItem('ageVerified') === 'true',
 };
 
 // Qty por produto antes de adicionar ao carrinho
@@ -1508,25 +1577,59 @@ const $$ = sel => document.querySelectorAll(sel);
 const waLink = msg => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
 
 /* ─────────────────────────────────────────────────────────
-   AGE VERIFICATION
-───────────────────────────────────────────────────────── */
-function initAge() {
-  if (state.ageVerified) { $('age-modal').classList.add('hidden'); return; }
-
-  $('age-yes').addEventListener('click', () => {
-    sessionStorage.setItem('ageVerified', 'true');
-    state.ageVerified = true;
-    $('age-modal').classList.add('hidden');
-  });
-
-  $('age-no').addEventListener('click', () => {
-    window.location.href = 'https://www.google.com';
-  });
-}
-
-/* ─────────────────────────────────────────────────────────
    HEADER BEHAVIOUR
 ───────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────
+   STATUS DA LOJA — aberta/fechada conforme o horário
+   Seg–Qui 10h–20h · Sex–Sáb 10h–20h30 · Dom 11h–17h
+───────────────────────────────────────────────────────── */
+const BUSINESS_HOURS = {
+  0: [11 * 60, 17 * 60],        // Domingo
+  1: [10 * 60, 20 * 60],        // Segunda
+  2: [10 * 60, 20 * 60],        // Terça
+  3: [10 * 60, 20 * 60],        // Quarta
+  4: [10 * 60, 20 * 60],        // Quinta
+  5: [10 * 60, 20 * 60 + 30],   // Sexta
+  6: [10 * 60, 20 * 60 + 30],   // Sábado
+};
+const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+
+function fmtHM(mins) {
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
+}
+
+function updateStoreStatus() {
+  const dot = $('status-dot');
+  const text = $('status-text');
+  if (!dot || !text) return;
+
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const [openM, closeM] = BUSINESS_HOURS[now.getDay()];
+
+  if (nowMinutes >= openM && nowMinutes < closeM) {
+    dot.className = 'status-dot open';
+    text.textContent = `Loja aberta agora · Fecha às ${fmtHM(closeM)}`;
+    return;
+  }
+
+  dot.className = 'status-dot closed';
+  for (let i = 0; i < 8; i++) {
+    const day = (now.getDay() + i) % 7;
+    const [oM] = BUSINESS_HOURS[day];
+    if (i === 0 && nowMinutes < oM) {
+      text.textContent = `Loja fechada agora · Abre hoje às ${fmtHM(oM)}`;
+      return;
+    }
+    if (i > 0) {
+      const label = i === 1 ? 'amanhã' : WEEKDAY_NAMES[day];
+      text.textContent = `Loja fechada agora · Abre ${label} às ${fmtHM(oM)}`;
+      return;
+    }
+  }
+}
+
 function initHeader() {
   let lastY = 0;
   window.addEventListener('scroll', () => {
@@ -1755,6 +1858,8 @@ function setZone(zone) {
   saveZone();
   renderTotals();
   if ($('err-zone')) $('err-zone').classList.remove('show');
+  const pagamento = document.querySelector('input[name="pagamento"]:checked');
+  if (pagamento?.value === 'Pix') renderPixPayment();
 }
 
 function initDeliveryZone() {
@@ -1840,6 +1945,7 @@ function closeCart() {
 ───────────────────────────────────────────────────────── */
 function openCheckout() {
   renderCheckoutSummary();
+  handlePagamentoToggle();
   closeCart();
   $('checkout-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1870,6 +1976,31 @@ function handlePagamentoToggle() {
   const pagamento = document.querySelector('input[name="pagamento"]:checked');
   if (!pagamento) return;
   $('troco-field').style.display = pagamento.value === 'Dinheiro' ? 'block' : 'none';
+
+  const isPix = pagamento.value === 'Pix';
+  $('pix-payment').style.display = isPix ? 'block' : 'none';
+  if (isPix) renderPixPayment();
+
+  $('send-btn').innerHTML = isPix
+    ? '<i class="ph-check-circle-bold"></i> Já paguei — enviar comprovante'
+    : '<i class="ph-whatsapp-logo-bold"></i> Enviar pedido pelo WhatsApp';
+}
+
+function initPixCopyButton() {
+  const btn = $('pix-copy-btn');
+  if (!btn) return;
+  btn.addEventListener('click', async () => {
+    const code = $('pix-code').value;
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      $('pix-code').select();
+      document.execCommand('copy');
+    }
+    const original = btn.textContent;
+    btn.textContent = 'Copiado!';
+    setTimeout(() => { btn.textContent = original; }, 1800);
+  });
 }
 
 function getFormData() {
@@ -1914,8 +2045,17 @@ Cidade: ${zoneName}
 Referência: ${data.referencia || 'Não informado'}`;
 
   const obsLine = data.obs?.trim() ? `\n\n*OBSERVAÇÕES*\n${data.obs.trim()}` : '';
+  const isPix = data.pagamento === 'Pix';
 
-  return `Olá, vim pelo site e gostaria de fazer um pedido.
+  const intro = isPix
+    ? 'Olá, fiz um pedido pelo site e já paguei via Pix. Segue o pedido — vou enviar o comprovante em seguida.'
+    : 'Olá, vim pelo site e gostaria de fazer um pedido.';
+
+  const outro = isPix
+    ? '📎 Envio o comprovante do Pix na próxima mensagem.'
+    : 'Aguardo a confirmação de disponibilidade, valor final e prazo.';
+
+  return `${intro}
 
 *DADOS DO CLIENTE*
 Nome: ${data.nome}
@@ -1938,7 +2078,7 @@ ${entregaLines}
 *PAGAMENTO*
 ${data.pagamento || 'Pix'}${data.pagamento === 'Dinheiro' && data.troco?.trim() ? `\nTroco para: ${data.troco.trim()}` : ''}${obsLine}
 
-Aguardo a confirmação de disponibilidade, valor final e prazo.`;
+${outro}`;
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -2086,7 +2226,8 @@ function initMenubar() {
 ───────────────────────────────────────────────────────── */
 function init() {
   window.scrollTo({ top: 0, behavior: 'instant' });
-  initAge();
+  updateStoreStatus();
+  setInterval(updateStoreStatus, 60000);
   initHeader();
   initWhatsAppLinks();
   buildCategoryFilter();
@@ -2099,6 +2240,7 @@ function init() {
   initEvents();
   initFeatureCards();
   initMenubar();
+  initPixCopyButton();
 }
 
 document.addEventListener('DOMContentLoaded', init);

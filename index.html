@@ -452,7 +452,32 @@
     font-family: var(--font-b); font-size: 20px; color: var(--blue); font-weight: 700;
   }
   .product-price span { font-size: 13px; opacity: .7; font-weight: 500; }
+  .price-old {
+    display: block; text-decoration: line-through; color: var(--subtle);
+    font-size: 13px; font-weight: 500; opacity: 1; margin-bottom: 1px;
+  }
+  .promo-badge {
+    position: absolute; top: 10px; left: 10px; z-index: 1;
+    background: var(--blue); color: #fff; font-size: 10.5px; font-weight: 700;
+    letter-spacing: .03em; text-transform: uppercase;
+    padding: 4px 9px; border-radius: 20px;
+  }
+  .stock-badge {
+    display: inline-block; font-size: 11.5px; font-weight: 600;
+    padding: 3px 9px; border-radius: 20px; margin-top: 4px; width: fit-content;
+  }
+  .stock-badge.low { background: rgba(184,121,20,.1); color: #B87914; }
+  .stock-badge.out { background: rgba(193,59,59,.1); color: #C13B3B; }
+  .thumb-out-overlay {
+    position: absolute; inset: 0; z-index: 1;
+    background: rgba(18,20,28,.55); backdrop-filter: blur(1px);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 13px; font-weight: 700; letter-spacing: .04em;
+    text-transform: uppercase;
+  }
   .qty-ctrl { display: flex; align-items: center; gap: 8px; }
+  .qty-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .add-btn:disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
   .qty-btn {
     width: 28px; height: 28px; border-radius: 50%;
     border: 1px solid var(--border-em); display: flex; align-items: center;
@@ -1031,7 +1056,9 @@
     <p class="section-sub reveal">Escolha o que quiser, defina a quantidade e adicione ao pedido. Preços e disponibilidade confirmados pela equipe.</p>
     <div class="divider reveal"></div>
     <div class="cat-filter" id="cat-filter" role="group" aria-label="Filtro por categoria"></div>
-    <div class="products-grid" id="products-grid" aria-label="Lista de produtos"></div>
+    <div class="products-grid" id="products-grid" aria-label="Lista de produtos">
+      <p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:40px 0">Carregando produtos…</p>
+    </div>
   </div>
 </section>
 
@@ -1438,8 +1465,24 @@
 <!-- ══════════════════════════════════════════════════════
      JAVASCRIPT
 ══════════════════════════════════════════════════════ -->
-<script>
+<script type="module">
 'use strict';
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import {
+  getFirestore, collection, onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyArSJ3HFvgZAvmJgyDNUpjLDvOqw5CT3KY",
+  authDomain: "flashpods-76ac6.firebaseapp.com",
+  projectId: "flashpods-76ac6",
+  storageBucket: "flashpods-76ac6.firebasestorage.app",
+  messagingSenderId: "643677174333",
+  appId: "1:643677174333:web:f0ed75b2ba08d294954854",
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
 
 /* ─────────────────────────────────────────────────────────
    CONFIG — ALTERE AQUI
@@ -1457,21 +1500,39 @@ const CONFIG = {
 };
 
 /* ─────────────────────────────────────────────────────────
-   PRODUTOS — ALTERE AQUI
-   Para adicionar imagem real: img: 'imagens/nome-do-arquivo.jpg'
+   PRODUTOS — carregados do Firestore (gerenciados em /admin)
 ───────────────────────────────────────────────────────── */
-const PRODUCTS = [
-  // DESCARTÁVEIS
-  { id: 16, cat: 'descartaveis', name: 'Ignite 8.000 Puffs — Grape Ice',         desc: 'Uva com toque de gelo. Até 8.000 puffs, nicotina 50mg',              price: 69.90, img: './produtos/ignite-grape-ice-8k.png' },
-  { id: 17, cat: 'descartaveis', name: 'Ignite 8.000 Puffs — Green Apple',       desc: 'Maçã verde refrescante. Até 8.000 puffs, nicotina 50mg',             price: 69.90, img: './produtos/ignite-green-apple.png' },
-  { id: 18, cat: 'descartaveis', name: 'Ignite 8.000 Puffs — Strawberry Kiwi',   desc: 'Morango com kiwi tropical. Até 8.000 puffs, nicotina 50mg',         price: 69.90, img: './produtos/ignite-strawberry-kiwi-8k.png' },
-  { id: 19, cat: 'descartaveis', name: 'Ignite 15.000 Puffs — Grape Ice',        desc: 'Uva com gelo. Autonomia superior com até 15.000 puffs, 50mg',        price: 99.90, img: null },
-  { id: 20, cat: 'descartaveis', name: 'Ignite 15.000 Puffs — Green Apple',      desc: 'Maçã verde gelada. Até 15.000 puffs, alto desempenho, 50mg',        price: 99.90, img: null },
-  { id: 21, cat: 'descartaveis', name: 'Ignite 15.000 Puffs — Strawberry Kiwi', desc: 'Morango e kiwi. Versão premium com até 15.000 puffs, 50mg',          price: 99.90, img: null },
-  { id: 22, cat: 'descartaveis', name: 'Elfbar BC5000 — Blue Razz Ice',          desc: 'Framboesa azul gelada. 5.000 puffs, malha dupla, design slim',       price: 64.90, img: null },
-  { id: 23, cat: 'descartaveis', name: 'Elfbar BC10000 — Peach Mango',           desc: 'Pêssego e manga. 10.000 puffs, display de bateria integrado',        price: 89.90, img: null },
-  // NÃO DESCARTÁVEIS — completar com o catálogo real (kits bateria+refil, refis)
-];
+let PRODUCTS = [];
+
+function startProductsListener() {
+  onSnapshot(collection(db, 'products'), (snap) => {
+    PRODUCTS = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        cat: data.category || 'descartaveis',
+        name: data.name || '',
+        desc: data.description || '',
+        price: Number(data.price) || 0,
+        promoPrice: data.promoPrice ? Number(data.promoPrice) : null,
+        stock: data.stock != null ? Number(data.stock) : 0,
+        img: data.image || null,
+      };
+    });
+    renderCatalog();
+  }, (err) => {
+    const grid = $('products-grid');
+    if (grid) grid.innerHTML = `<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:40px 0">Não foi possível carregar os produtos agora. Tente recarregar a página.</p>`;
+    console.error('Erro ao carregar produtos:', err);
+  });
+}
+
+function renderCatalog() {
+  buildCategoryFilter();
+  renderProducts();
+  filterProducts(state.activeCategory || 'all');
+  observeCards();
+}
 
 const CAT_NAMES = {
   descartaveis:     'Descartáveis',
@@ -1750,11 +1811,13 @@ function initWhatsAppLinks() {
 ───────────────────────────────────────────────────────── */
 function buildCategoryFilter() {
   const filter = $('cat-filter');
+  filter.innerHTML = '';
+  const activeCat = state.activeCategory || 'all';
   const cats = ['all', ...Object.keys(CAT_NAMES)];
   cats.forEach(cat => {
     if (cat !== 'all' && !PRODUCTS.some(p => p.cat === cat)) return;
     const btn = document.createElement('button');
-    btn.className = 'cat-btn' + (cat === 'all' ? ' active' : '');
+    btn.className = 'cat-btn' + (cat === activeCat ? ' active' : '');
     btn.dataset.cat = cat;
     btn.textContent = cat === 'all' ? 'Todos' : CAT_NAMES[cat];
     btn.addEventListener('click', () => {
@@ -1774,41 +1837,61 @@ function filterProducts(cat) {
   });
 }
 
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
 function buildProductCard(product) {
-  pendingQty[product.id] = 1;
+  const inStock = (product.stock || 0) > 0;
+  pendingQty[product.id] = inStock ? 1 : 0;
 
   const card = document.createElement('div');
   card.className = 'product-card reveal';
   card.dataset.cat = product.cat;
 
   const thumb = product.img
-    ? `<img src="${product.img}" alt="${product.name}" class="product-img" loading="lazy">`
+    ? `<img src="${product.img}" alt="${escapeHtml(product.name)}" class="product-img" loading="lazy">`
     : `<i class="${CAT_ICONS[product.cat] || 'ph-package-bold'}"></i>`;
+
+  const hasPromo = product.promoPrice && product.promoPrice < product.price;
+  const effectivePrice = hasPromo ? product.promoPrice : product.price;
+  const priceHtml = hasPromo
+    ? `<div class="product-price"><span class="price-old">${fmt(product.price)}</span><span>R$&nbsp;</span>${effectivePrice.toFixed(2).replace('.', ',')}</div>`
+    : `<div class="product-price"><span>R$&nbsp;</span>${effectivePrice.toFixed(2).replace('.', ',')}</div>`;
+
+  const stockHtml = !inStock
+    ? `<span class="stock-badge out">Esgotado</span>`
+    : (product.stock <= 3 ? `<span class="stock-badge low">Só ${product.stock} em estoque</span>` : '');
 
   card.innerHTML = `
     <div class="product-thumb pt-${product.cat}">
       ${thumb}
+      ${hasPromo ? '<span class="promo-badge">Promoção</span>' : ''}
+      ${!inStock ? '<div class="thumb-out-overlay">Esgotado</div>' : ''}
     </div>
     <div class="product-body">
       <span class="product-cat">${CAT_NAMES[product.cat] || product.cat}</span>
-      <h3 class="product-name">${product.name}</h3>
-      <p class="product-desc">${product.desc}</p>
+      <h3 class="product-name">${escapeHtml(product.name)}</h3>
+      <p class="product-desc">${escapeHtml(product.desc)}</p>
+      ${stockHtml}
       <div class="product-footer">
-        <div class="product-price"><span>R$&nbsp;</span>${product.price.toFixed(2).replace('.', ',')}</div>
+        ${priceHtml}
         <div class="qty-ctrl" aria-label="Quantidade">
-          <button class="qty-btn" data-id="${product.id}" data-action="dec" aria-label="Diminuir">&#8722;</button>
-          <span class="qty-num" id="qty-${product.id}">1</span>
-          <button class="qty-btn" data-id="${product.id}" data-action="inc" aria-label="Aumentar">+</button>
+          <button class="qty-btn" data-id="${product.id}" data-action="dec" aria-label="Diminuir" ${!inStock ? 'disabled' : ''}>&#8722;</button>
+          <span class="qty-num" id="qty-${product.id}">${inStock ? 1 : 0}</span>
+          <button class="qty-btn" data-id="${product.id}" data-action="inc" aria-label="Aumentar" ${!inStock ? 'disabled' : ''}>+</button>
         </div>
       </div>
-      <button class="btn btn-outline btn-full btn-sm add-btn" data-id="${product.id}">
-        <i class="ph-shopping-cart-bold"></i> Adicionar ao pedido
+      <button class="btn btn-outline btn-full btn-sm add-btn" data-id="${product.id}" ${!inStock ? 'disabled' : ''}>
+        <i class="ph-shopping-cart-bold"></i> ${inStock ? 'Adicionar ao pedido' : 'Esgotado'}
       </button>
     </div>`;
 
   card.querySelector('.add-btn').addEventListener('click', () => {
     const qty = pendingQty[product.id] || 1;
-    addToCart(product.id, qty);
+    addToCart(product.id, qty, effectivePrice);
     // visual feedback
     const btn = card.querySelector('.add-btn');
     btn.innerHTML = '<i class="ph-check-bold"></i> Adicionado';
@@ -1821,9 +1904,10 @@ function buildProductCard(product) {
 
   card.querySelectorAll('.qty-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const id = parseInt(btn.dataset.id);
+      const id = btn.dataset.id;
       const action = btn.dataset.action;
-      pendingQty[id] = Math.max(1, (pendingQty[id] || 1) + (action === 'inc' ? 1 : -1));
+      const max = product.stock || 1;
+      pendingQty[id] = Math.min(max, Math.max(1, (pendingQty[id] || 1) + (action === 'inc' ? 1 : -1)));
       $(`qty-${id}`).textContent = pendingQty[id];
     });
   });
@@ -1833,20 +1917,25 @@ function buildProductCard(product) {
 
 function renderProducts() {
   const grid = $('products-grid');
+  grid.innerHTML = '';
+  if (PRODUCTS.length === 0) {
+    grid.innerHTML = `<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:40px 0">Nenhum produto cadastrado ainda.</p>`;
+    return;
+  }
   PRODUCTS.forEach(p => grid.appendChild(buildProductCard(p)));
 }
 
 /* ─────────────────────────────────────────────────────────
    CART
 ───────────────────────────────────────────────────────── */
-function addToCart(productId, qty) {
+function addToCart(productId, qty, price) {
   const existing = state.cart.find(i => i.id === productId);
   if (existing) {
     existing.qty = Math.min(existing.qty + qty, 99);
   } else {
     const p = PRODUCTS.find(p => p.id === productId);
     if (!p) return;
-    state.cart.push({ id: p.id, name: p.name, price: p.price, cat: p.cat, qty });
+    state.cart.push({ id: p.id, name: p.name, price: price != null ? price : p.price, cat: p.cat, qty });
   }
   saveCart();
   renderCart();
@@ -1954,9 +2043,9 @@ function renderCart() {
       </div>`;
 
     el.querySelectorAll('.ci-qty-btn').forEach(btn =>
-      btn.addEventListener('click', () => updateCartQty(parseInt(btn.dataset.id), btn.dataset.action === 'inc' ? 1 : -1))
+      btn.addEventListener('click', () => updateCartQty(btn.dataset.id, btn.dataset.action === 'inc' ? 1 : -1))
     );
-    el.querySelector('.ci-rm').addEventListener('click', () => removeFromCart(parseInt(el.querySelector('.ci-rm').dataset.id)));
+    el.querySelector('.ci-rm').addEventListener('click', () => removeFromCart(el.querySelector('.ci-rm').dataset.id));
 
     body.appendChild(el);
   });
@@ -2281,8 +2370,7 @@ function init() {
   setInterval(updateStoreStatus, 60000);
   initHeader();
   initWhatsAppLinks();
-  buildCategoryFilter();
-  renderProducts();
+  startProductsListener();
   renderCart();
   initDeliveryZone();
   updateCartBadge();

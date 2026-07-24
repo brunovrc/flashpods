@@ -1506,19 +1506,22 @@ let PRODUCTS = [];
 
 function startProductsListener() {
   onSnapshot(collection(db, 'products'), (snap) => {
-    PRODUCTS = snap.docs.map(d => {
-      const data = d.data();
-      return {
-        id: d.id,
-        cat: data.category || 'descartaveis',
-        name: data.name || '',
-        desc: data.description || '',
-        price: Number(data.price) || 0,
-        promoPrice: data.promoPrice ? Number(data.promoPrice) : null,
-        stock: data.stock != null ? Number(data.stock) : 0,
-        img: data.image || null,
-      };
-    });
+    PRODUCTS = snap.docs
+      .map(d => {
+        const data = d.data();
+        return {
+          id: d.id,
+          cat: data.category || 'descartaveis',
+          name: data.name || '',
+          desc: data.description || '',
+          price: Number(data.price) || 0,
+          promoPrice: data.promoPrice ? Number(data.promoPrice) : null,
+          stock: data.stock != null ? Number(data.stock) : 0,
+          img: data.image || null,
+          active: data.active !== false,
+        };
+      })
+      .filter(p => p.active);
     renderCatalog();
   }, (err) => {
     const grid = $('products-grid');

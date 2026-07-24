@@ -141,6 +141,14 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
   display: flex; align-items: center; gap: 14px;
   background: var(--card); border: 1px solid var(--border);
   border-radius: var(--radius-lg); padding: 12px; margin-bottom: 10px;
+  transition: opacity var(--tr);
+}
+.product-row.is-paused { opacity: .55; }
+.pr-paused-badge {
+  display: inline-block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .03em; color: var(--subtle);
+  background: var(--surface); border: 1px solid var(--border-em);
+  padding: 2px 8px; border-radius: 20px; margin-left: 6px; vertical-align: middle;
 }
 .pr-thumb {
   width: 56px; height: 56px; border-radius: var(--radius);
@@ -338,7 +346,7 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
           <input type="number" id="p-price" step="0.01" min="0" placeholder="69.90" required>
         </div>
         <div>
-          <label class="form-label" for="p-promo">Preço promocional (opcional)</label>
+          <label class="form-label" for="p-promo">Preço promocional</label>
           <input type="number" id="p-promo" step="0.01" min="0" placeholder="Deixe em branco se não tiver">
         </div>
       </div>
@@ -479,10 +487,12 @@ function renderStats() {
   const total = products.length;
   const outOfStock = products.filter(p => Number(p.stock) === 0).length;
   const onPromo = products.filter(p => p.promoPrice).length;
+  const paused = products.filter(p => p.active === false).length;
   $('stats-row').innerHTML = `
     <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Produtos no catálogo</div></div>
     <div class="stat-card"><div class="stat-num">${outOfStock}</div><div class="stat-label">Esgotados</div></div>
     <div class="stat-card"><div class="stat-num">${onPromo}</div><div class="stat-label">Em promoção</div></div>
+    <div class="stat-card"><div class="stat-num">${paused}</div><div class="stat-label">Pausados</div></div>
   `;
 }
 
@@ -542,10 +552,23 @@ function renderProductsList() {
   holder.querySelectorAll('[data-delete]').forEach(btn =>
     btn.addEventListener('click', () => deleteProduct(btn.dataset.delete))
   );
+  holder.querySelectorAll('[data-toggle]').forEach(btn =>
+    btn.addEventListener('click', () => toggleActive(btn.dataset.toggle, btn.dataset.active === 'true'))
+  );
+}
+
+async function toggleActive(id, wasActive) {
+  try {
+    await updateDoc(doc(db, 'products', id), { active: !wasActive, updatedAt: serverTimestamp() });
+    showToast(wasActive ? 'Produto pausado — some do site até você reativar.' : 'Produto reativado — já aparece no site.');
+  } catch (err) {
+    showToast('Erro ao atualizar: ' + err.message, true);
+  }
 }
 
 function productRowHtml(p) {
   const stock = Number(p.stock) || 0;
+  const isActive = p.active !== false;
   const stockClass = stock === 0 ? 'zero' : (stock <= 2 ? 'low' : '');
   const stockLabel = stock === 0 ? 'Esgotado' : `${stock} em estoque`;
   const priceHtml = p.promoPrice
@@ -554,20 +577,23 @@ function productRowHtml(p) {
   const thumb = p.image
     ? `<img src="${p.image}" alt="">`
     : `<i class="ph-package-bold"></i>`;
+  const pauseIcon = isActive ? 'ph-pause-bold' : 'ph-play-bold';
+  const pauseLabel = isActive ? 'Pausar (tirar do site)' : 'Reativar (mostrar no site)';
 
   return `
-    <div class="product-row">
+    <div class="product-row${isActive ? '' : ' is-paused'}">
       <div class="pr-thumb">${thumb}</div>
       <div class="pr-body">
-        <div class="pr-name">${escapeHtml(p.name || '(sem nome)')}</div>
+        <div class="pr-name">${escapeHtml(p.name || '(sem nome)')} ${!isActive ? '<span class="pr-paused-badge">Pausado</span>' : ''}</div>
         <div class="pr-meta">
           ${priceHtml}
           <span class="pr-stock ${stockClass}">${stockLabel}</span>
         </div>
       </div>
       <div class="pr-actions">
-        <button class="pr-icon-btn" data-edit="${p.id}" aria-label="Editar"><i class="ph-pencil-simple-bold"></i></button>
-        <button class="pr-icon-btn danger" data-delete="${p.id}" aria-label="Remover"><i class="ph-trash-bold"></i></button>
+        <button class="pr-icon-btn" data-toggle="${p.id}" data-active="${isActive}" aria-label="${pauseLabel}" title="${pauseLabel}"><i class="${pauseIcon}"></i></button>
+        <button class="pr-icon-btn" data-edit="${p.id}" aria-label="Editar" title="Editar"><i class="ph-pencil-simple-bold"></i></button>
+        <button class="pr-icon-btn danger" data-delete="${p.id}" aria-label="Remover" title="Remover"><i class="ph-trash-bold"></i></button>
       </div>
     </div>`;
 }
@@ -708,6 +734,7 @@ $('product-form').addEventListener('submit', async (e) => {
       await updateDoc(doc(db, 'products', id), data);
       showToast('Produto atualizado.');
     } else {
+      data.active = true;
       data.createdAt = serverTimestamp();
       await addDoc(collection(db, 'products'), data);
       showToast('Produto adicionado.');

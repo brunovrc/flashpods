@@ -130,6 +130,51 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
 .stat-num { font-size: 24px; font-weight: 800; color: var(--blue); }
 .stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
+/* ── STATUS DA LOJA ──────────────────────────────────── */
+.store-status-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 24px;
+}
+.store-status-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.store-status-head h2 { font-size: 15px; font-weight: 800; }
+.store-status-head .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.store-status-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; font-weight: 700; padding: 6px 12px; border-radius: 20px;
+  white-space: nowrap;
+}
+.store-status-pill.open { background: rgba(31,174,92,.1); color: #1FAE5C; }
+.store-status-pill.closed { background: rgba(145,152,172,.14); color: var(--muted); }
+.store-mode-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+.mode-pill {
+  display: flex; align-items: center; gap: 7px;
+  border: 1px solid var(--border-em); border-radius: var(--radius);
+  padding: 9px 14px; font-size: 13px; font-weight: 600; color: var(--muted);
+  background: var(--card); transition: all var(--tr);
+}
+.mode-pill:hover { border-color: var(--blue); color: var(--text); }
+.mode-pill.active { border-color: var(--blue); background: var(--blue-dim); color: var(--blue); }
+
+/* ── CATEGORIAS ──────────────────────────────────────── */
+.cat-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.cat-chip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 6px 8px 6px 14px;
+  font-size: 13px; font-weight: 600; color: var(--text);
+}
+.cat-chip-count { color: var(--muted); font-weight: 500; }
+.cat-chip-del {
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--subtle); font-size: 12px; transition: all var(--tr);
+}
+.cat-chip-del:hover { background: rgba(193,59,59,.1); color: #C13B3B; }
+.cat-add-form { display: flex; gap: 8px; }
+.cat-add-form input { flex: 1; }
+.cat-add-form .btn { flex-shrink: 0; }
+.empty-cats { font-size: 13px; color: var(--muted); }
+
 /* ── PRODUCT LIST ────────────────────────────────────── */
 .cat-group { margin-bottom: 32px; }
 .cat-group-title {
@@ -289,6 +334,42 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
   </header>
 
   <main>
+    <div class="store-status-card">
+      <div class="store-status-head">
+        <div>
+          <h2>Status da loja</h2>
+          <p class="sub" id="store-auto-info">Horário automático: carregando…</p>
+        </div>
+        <span class="store-status-pill" id="store-status-pill">—</span>
+      </div>
+      <div class="store-mode-pills" role="radiogroup" aria-label="Controle da loja">
+        <button type="button" class="mode-pill" data-mode="auto">
+          <i class="ph-clock-bold"></i> Automático
+        </button>
+        <button type="button" class="mode-pill" data-mode="open">
+          <i class="ph-check-circle-bold"></i> Forçar aberta
+        </button>
+        <button type="button" class="mode-pill" data-mode="closed">
+          <i class="ph-x-circle-bold"></i> Forçar fechada
+        </button>
+      </div>
+      <p class="field-hint">No automático, a loja segue o horário de funcionamento sozinha. Escolha "Forçar aberta/fechada" pra abrir mais cedo, fechar mais tarde, ou fechar num feriado, por exemplo — fica assim até você voltar pro automático.</p>
+    </div>
+
+    <div class="store-status-card">
+      <div class="store-status-head" style="margin-bottom:14px">
+        <div>
+          <h2>Categorias</h2>
+          <p class="sub">Organize os produtos do site em categorias — crie quantas quiser</p>
+        </div>
+      </div>
+      <div class="cat-chip-row" id="cat-chip-row"></div>
+      <form id="cat-form" class="cat-add-form">
+        <input type="text" id="cat-name" placeholder="Nome da nova categoria (ex: Kits e refis)" maxlength="30">
+        <button type="submit" class="btn btn-outline btn-sm"><i class="ph-plus-bold"></i> Criar</button>
+      </form>
+    </div>
+
     <div class="toolbar">
       <div>
         <h1>Produtos</h1>
@@ -334,10 +415,7 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
 
       <div class="form-group">
         <label class="form-label" for="p-cat">Categoria</label>
-        <select id="p-cat">
-          <option value="descartaveis">Descartáveis</option>
-          <option value="nao-descartaveis">Não descartáveis</option>
-        </select>
+        <select id="p-cat"></select>
       </div>
 
       <div class="form-group form-row-2">
@@ -388,7 +466,7 @@ import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, serverTimestamp
+  getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 /* ─────────────────────────────────────────────────────────
@@ -407,9 +485,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const CAT_NAMES = { descartaveis: 'Descartáveis', 'nao-descartaveis': 'Não descartáveis' };
+let categories = []; // [{ id, name }]
+let categoriesSeeded = false;
+
+function catName(id) {
+  const c = categories.find(c => c.id === id);
+  return c ? c.name : id;
+}
+
+function slugify(str) {
+  return str
+    .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    .toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-+|-+$)/g, '')
+    .slice(0, 40) || 'categoria';
+}
 
 const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelectorAll(sel);
 const fmt = n => 'R$ ' + Number(n).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 let products = [];
@@ -459,7 +553,9 @@ onAuthStateChanged(auth, (user) => {
     $('login-screen').classList.add('hidden');
     $('dashboard').classList.remove('hidden');
     $('header-user').textContent = user.email;
+    startCategoriesListener();
     startProductsListener();
+    startStoreSettingsListener();
   } else {
     $('dashboard').classList.add('hidden');
     $('login-screen').classList.remove('hidden');
@@ -472,6 +568,157 @@ onAuthStateChanged(auth, (user) => {
 /* ─────────────────────────────────────────────────────────
    LISTA DE PRODUTOS (tempo real)
 ───────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────
+   STATUS DA LOJA — automático + override manual
+   Seg–Qui 9h30–22h30 · Sex–Sáb 9h30–00h · Dom 12h–22h
+───────────────────────────────────────────────────────── */
+const BUSINESS_HOURS = {
+  0: [12 * 60, 22 * 60],
+  1: [9 * 60 + 30, 22 * 60 + 30],
+  2: [9 * 60 + 30, 22 * 60 + 30],
+  3: [9 * 60 + 30, 22 * 60 + 30],
+  4: [9 * 60 + 30, 22 * 60 + 30],
+  5: [9 * 60 + 30, 24 * 60],
+  6: [9 * 60 + 30, 24 * 60],
+};
+const WEEKDAY_NAMES_FULL = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+
+function fmtHM(mins) {
+  if (mins >= 24 * 60) return 'meia-noite';
+  const h = Math.floor(mins / 60), m = mins % 60;
+  return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
+}
+
+function isAutoOpenNow() {
+  const now = new Date();
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const [openM, closeM] = BUSINESS_HOURS[now.getDay()];
+  return nowMinutes >= openM && nowMinutes < closeM;
+}
+
+let storeMode = 'auto';
+
+function startStoreSettingsListener() {
+  onSnapshot(doc(db, 'settings', 'store'), (snap) => {
+    storeMode = (snap.exists() && snap.data().mode) ? snap.data().mode : 'auto';
+    renderStoreStatus();
+  });
+}
+
+function renderStoreStatus() {
+  const today = new Date().getDay();
+  $('store-auto-info').textContent = `Horário automático hoje (${WEEKDAY_NAMES_FULL[today]}): ${fmtHM(BUSINESS_HOURS[today][0])} às ${fmtHM(BUSINESS_HOURS[today][1])}`;
+
+  $$('.mode-pill').forEach(btn => btn.classList.toggle('active', btn.dataset.mode === storeMode));
+
+  const isOpen = storeMode === 'open' || (storeMode === 'auto' && isAutoOpenNow());
+  const pill = $('store-status-pill');
+  pill.className = 'store-status-pill ' + (isOpen ? 'open' : 'closed');
+  const modeNote = storeMode === 'auto' ? '' : ' (manual)';
+  pill.innerHTML = `<i class="${isOpen ? 'ph-check-circle-bold' : 'ph-moon-bold'}"></i> ${isOpen ? 'Aberta' : 'Fechada'}${modeNote}`;
+}
+
+async function setStoreMode(mode) {
+  try {
+    await setDoc(doc(db, 'settings', 'store'), { mode, updatedAt: serverTimestamp() }, { merge: true });
+  } catch (err) {
+    showToast('Erro ao atualizar status da loja: ' + err.message, true);
+  }
+}
+
+$$('.mode-pill').forEach(btn => btn.addEventListener('click', () => setStoreMode(btn.dataset.mode)));
+setInterval(renderStoreStatus, 60000);
+
+/* ─────────────────────────────────────────────────────────
+   CATEGORIAS
+───────────────────────────────────────────────────────── */
+const DEFAULT_CATEGORIES = [
+  { id: 'descartaveis', name: 'Descartáveis' },
+  { id: 'nao-descartaveis', name: 'Não descartáveis' },
+];
+
+function startCategoriesListener() {
+  onSnapshot(collection(db, 'categories'), async (snap) => {
+    if (snap.empty && !categoriesSeeded) {
+      categoriesSeeded = true;
+      for (const c of DEFAULT_CATEGORIES) {
+        await setDoc(doc(db, 'categories', c.id), { name: c.name, createdAt: serverTimestamp() });
+      }
+      return; // o próprio seed vai disparar esse listener de novo com os dados
+    }
+    categories = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    renderCategories();
+    updateCategorySelect();
+    renderProductsList();
+  });
+}
+
+function renderCategories() {
+  const holder = $('cat-chip-row');
+  if (categories.length === 0) {
+    holder.innerHTML = `<p class="empty-cats">Nenhuma categoria ainda.</p>`;
+    return;
+  }
+  holder.innerHTML = categories.map(c => {
+    const count = products.filter(p => p.category === c.id).length;
+    return `
+      <div class="cat-chip">
+        <span>${escapeHtml(c.name)}</span>
+        <span class="cat-chip-count">(${count})</span>
+        <button type="button" class="cat-chip-del" data-cat-del="${c.id}" aria-label="Remover categoria" title="Remover categoria">
+          <i class="ph-x-bold"></i>
+        </button>
+      </div>`;
+  }).join('');
+
+  holder.querySelectorAll('[data-cat-del]').forEach(btn =>
+    btn.addEventListener('click', () => deleteCategory(btn.dataset.catDel))
+  );
+}
+
+function updateCategorySelect() {
+  const select = $('p-cat');
+  const current = select.value;
+  select.innerHTML = categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+  if (current && categories.some(c => c.id === current)) select.value = current;
+}
+
+$('cat-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = $('cat-name');
+  const name = input.value.trim();
+  if (!name) return;
+  const id = slugify(name);
+  if (categories.some(c => c.id === id)) {
+    showToast('Já existe uma categoria parecida com essa.', true);
+    return;
+  }
+  try {
+    await setDoc(doc(db, 'categories', id), { name, createdAt: serverTimestamp() });
+    input.value = '';
+    showToast('Categoria criada.');
+  } catch (err) {
+    showToast('Erro ao criar categoria: ' + err.message, true);
+  }
+});
+
+async function deleteCategory(id) {
+  const inUse = products.filter(p => p.category === id).length;
+  if (inUse > 0) {
+    showToast(`Essa categoria tem ${inUse} produto(s). Mude a categoria deles antes de remover.`, true);
+    return;
+  }
+  const cat = categories.find(c => c.id === id);
+  if (!confirm(`Remover a categoria "${cat?.name || id}"?`)) return;
+  try {
+    await deleteDoc(doc(db, 'categories', id));
+    showToast('Categoria removida.');
+  } catch (err) {
+    showToast('Erro ao remover: ' + err.message, true);
+  }
+}
+
 function startProductsListener() {
   unsubscribe = onSnapshot(collection(db, 'products'), (snap) => {
     products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -541,7 +788,7 @@ function renderProductsList() {
 
   holder.innerHTML = Object.keys(groups).map(cat => `
     <div class="cat-group">
-      <div class="cat-group-title">${CAT_NAMES[cat] || cat} (${groups[cat].length})</div>
+      <div class="cat-group-title">${catName(cat)} (${groups[cat].length})</div>
       ${groups[cat].map(p => productRowHtml(p)).join('')}
     </div>
   `).join('');

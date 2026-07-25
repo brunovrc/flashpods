@@ -1088,9 +1088,9 @@
         <i class="entrega-icon ph-clock-bold"></i>
         <h3>Horário de atendimento</h3>
         <ul>
-          <li>Seg a qui: 10h – 20h</li>
-          <li>Sex e sáb: 10h – 20h30</li>
-          <li>Dom: 11h – 17h</li>
+          <li>Seg a qui: 9h30 – 22h30</li>
+          <li>Sex e sáb: 9h30 – 00h</li>
+          <li>Dom: 12h – 22h</li>
           <li>Pedidos recebidos fora do horário são confirmados na abertura</li>
           <li>Atendimento exclusivo para maiores de 18 anos</li>
         </ul>
@@ -1130,9 +1130,9 @@
           <div class="loc-row-content">
             <h4>Horário de funcionamento</h4>
             <table class="hours-table">
-              <tr><td>Segunda a quinta</td><td>10h – 20h</td></tr>
-              <tr><td>Sexta e sábado</td><td>10h – 20h30</td></tr>
-              <tr><td>Domingo</td><td>11h – 17h</td></tr>
+              <tr><td>Segunda a quinta</td><td>9h30 – 22h30</td></tr>
+              <tr><td>Sexta e sábado</td><td>9h30 – 00h</td></tr>
+              <tr><td>Domingo</td><td>12h – 22h</td></tr>
             </table>
           </div>
         </div>
@@ -1470,7 +1470,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
-  getFirestore, collection, onSnapshot
+  getFirestore, collection, onSnapshot, doc
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1493,11 +1493,21 @@ const CONFIG = {
   instagram:  '@flashhpod',
   endereco:   'Maringá - PR e Sarandi - PR',
   siteUrl:    'https://seu-site.com',
-  horarios:   'Seg–Qui: 10h às 20h · Sex–Sáb: 10h às 20h30 · Dom: 11h às 17h',
+  horarios:   'Seg–Qui: 9h30 às 22h30 · Sex–Sáb: 9h30 à meia-noite · Dom: 12h às 22h',
   pixKey:     '+5544984134092',
   pixName:    'LUIS CLAUDIO',
   pixCity:    'MARINGA',
 };
+
+/* ─────────────────────────────────────────────────────────
+   CONFIGURAÇÃO DA LOJA (override manual aberta/fechada)
+───────────────────────────────────────────────────────── */
+function startStoreSettingsListener() {
+  onSnapshot(doc(db, 'settings', 'store'), (snap) => {
+    storeOverride = (snap.exists() && snap.data().mode) ? snap.data().mode : 'auto';
+    updateStoreStatus();
+  }, () => { storeOverride = 'auto'; updateStoreStatus(); });
+}
 
 /* ─────────────────────────────────────────────────────────
    PRODUTOS — carregados do Firestore (gerenciados em /admin)
@@ -1537,7 +1547,7 @@ function renderCatalog() {
   observeCards();
 }
 
-const CAT_NAMES = {
+let CAT_NAMES = {
   descartaveis:     'Descartáveis',
   'nao-descartaveis': 'Não descartáveis',
 };
@@ -1546,6 +1556,16 @@ const CAT_ICONS = {
   descartaveis:     'ph-cloud-bold',
   'nao-descartaveis': 'ph-battery-charging-bold',
 };
+
+function startCategoriesListener() {
+  onSnapshot(collection(db, 'categories'), (snap) => {
+    if (snap.empty) return; // mantém os padrões até o admin criar categorias no Firestore
+    const names = {};
+    snap.docs.forEach(d => { names[d.id] = d.data().name || d.id; });
+    CAT_NAMES = names;
+    renderCatalog();
+  });
+}
 
 /* ─────────────────────────────────────────────────────────
    ENTREGA — TAXA FIXA POR CIDADE
@@ -1662,31 +1682,41 @@ const waLink = msg => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponen
 ───────────────────────────────────────────────────────── */
 /* ─────────────────────────────────────────────────────────
    STATUS DA LOJA — aberta/fechada conforme o horário
-   Seg–Qui 10h–20h · Sex–Sáb 10h–20h30 · Dom 11h–17h
+   Seg–Qui 9h30–22h30 · Sex–Sáb 9h30–00h · Dom 12h–22h
 ───────────────────────────────────────────────────────── */
 const BUSINESS_HOURS = {
-  0: [11 * 60, 17 * 60],        // Domingo
-  1: [10 * 60, 20 * 60],        // Segunda
-  2: [10 * 60, 20 * 60],        // Terça
-  3: [10 * 60, 20 * 60],        // Quarta
-  4: [10 * 60, 20 * 60],        // Quinta
-  5: [10 * 60, 20 * 60 + 30],   // Sexta
-  6: [10 * 60, 20 * 60 + 30],   // Sábado
+  0: [12 * 60, 22 * 60],        // Domingo — 12:00 às 22:00
+  1: [9 * 60 + 30, 22 * 60 + 30], // Segunda — 9:30 às 22:30
+  2: [9 * 60 + 30, 22 * 60 + 30], // Terça — 9:30 às 22:30
+  3: [9 * 60 + 30, 22 * 60 + 30], // Quarta — 9:30 às 22:30
+  4: [9 * 60 + 30, 22 * 60 + 30], // Quinta — 9:30 às 22:30
+  5: [9 * 60 + 30, 24 * 60],     // Sexta — 9:30 até 00:00
+  6: [9 * 60 + 30, 24 * 60],     // Sábado — 9:30 até 00:00
 };
 const WEEKDAY_NAMES = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
 
 function fmtHM(mins) {
+  if (mins >= 24 * 60) return 'meia-noite';
   const h = Math.floor(mins / 60), m = mins % 60;
   return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`;
 }
 
+let storeOverride = 'auto';
+
 function getStoreStatus() {
+  if (storeOverride === 'open') {
+    return { isOpen: true, label: 'Loja aberta agora (aberta manualmente)', shortLabel: 'Loja aberta agora.' };
+  }
+  if (storeOverride === 'closed') {
+    return { isOpen: false, label: 'Loja fechada agora (fechada manualmente)', shortLabel: 'Loja fechada agora — volta em breve.' };
+  }
+
   const now = new Date();
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
   const [openM, closeM] = BUSINESS_HOURS[now.getDay()];
 
   if (nowMinutes >= openM && nowMinutes < closeM) {
-    return { isOpen: true, label: `Loja aberta agora · Fecha às ${fmtHM(closeM)}`, shortLabel: `Loja fechada agora.` };
+    return { isOpen: true, label: `Loja aberta agora · Fecha às ${fmtHM(closeM)}`, shortLabel: `Loja aberta agora.` };
   }
 
   for (let i = 0; i < 8; i++) {
@@ -2373,6 +2403,8 @@ function init() {
   setInterval(updateStoreStatus, 60000);
   initHeader();
   initWhatsAppLinks();
+  startStoreSettingsListener();
+  startCategoriesListener();
   startProductsListener();
   renderCart();
   initDeliveryZone();

@@ -685,10 +685,11 @@ $('cat-form').addEventListener('submit', async (e) => {
   const input = $('cat-name');
   const name = input.value.trim();
   if (!name) return;
-  const id = slugify(name);
+  let id = slugify(name);
   if (categories.some(c => c.id === id)) {
-    showToast('Já existe uma categoria parecida com essa.', true);
-    return;
+    let n = 2;
+    while (categories.some(c => c.id === `${id}-${n}`)) n++;
+    id = `${id}-${n}`;
   }
   try {
     await setDoc(doc(db, 'categories', id), { name, createdAt: serverTimestamp() });

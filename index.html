@@ -466,7 +466,6 @@
     display: inline-block; font-size: 11.5px; font-weight: 600;
     padding: 3px 9px; border-radius: 20px; margin-top: 4px; width: fit-content;
   }
-  .stock-badge.low { background: rgba(184,121,20,.1); color: #B87914; }
   .stock-badge.out { background: rgba(193,59,59,.1); color: #C13B3B; }
   .thumb-out-overlay {
     position: absolute; inset: 0; z-index: 1;
@@ -1898,7 +1897,7 @@ function buildProductCard(product) {
 
   const stockHtml = !inStock
     ? `<span class="stock-badge out">Esgotado</span>`
-    : (product.stock <= 3 ? `<span class="stock-badge low">Só ${product.stock} em estoque</span>` : '');
+    : '';
 
   card.innerHTML = `
     <div class="product-thumb pt-${product.cat}">

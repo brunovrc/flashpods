@@ -189,6 +189,13 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
   background: var(--surface); border: 1px solid var(--border-em);
   padding: 2px 8px; border-radius: 20px; margin-left: 6px; vertical-align: middle;
 }
+.pr-warn-badge {
+  display: inline-block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .03em; color: #B87914;
+  background: rgba(184,121,20,.1); border: 1px solid rgba(184,121,20,.28);
+  padding: 2px 8px; border-radius: 20px; margin-left: 6px; vertical-align: middle;
+  cursor: help;
+}
 .pr-thumb {
   width: 56px; height: 56px; border-radius: var(--radius);
   background: var(--surface); flex-shrink: 0; overflow: hidden;
@@ -738,11 +745,13 @@ function renderStats() {
   const outOfStock = products.filter(p => Number(p.stock) === 0).length;
   const onPromo = products.filter(p => p.promoPrice).length;
   const paused = products.filter(p => p.active === false).length;
+  const noModel = products.filter(p => !p.model).length;
   $('stats-row').innerHTML = `
     <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Produtos no catálogo</div></div>
     <div class="stat-card"><div class="stat-num">${outOfStock}</div><div class="stat-label">Esgotados</div></div>
     <div class="stat-card"><div class="stat-num">${onPromo}</div><div class="stat-label">Em promoção</div></div>
     <div class="stat-card"><div class="stat-num">${paused}</div><div class="stat-label">Pausados</div></div>
+    <div class="stat-card"><div class="stat-num" style="${noModel > 0 ? 'color:#B87914' : ''}">${noModel}</div><div class="stat-label">Sem modelo cadastrado</div></div>
   `;
 }
 
@@ -835,7 +844,7 @@ function productRowHtml(p) {
     <div class="product-row${isActive ? '' : ' is-paused'}">
       <div class="pr-thumb">${thumb}</div>
       <div class="pr-body">
-        <div class="pr-name">${escapeHtml(fullName)} ${!isActive ? '<span class="pr-paused-badge">Pausado</span>' : ''}</div>
+        <div class="pr-name">${escapeHtml(fullName)} ${!isActive ? '<span class="pr-paused-badge">Pausado</span>' : ''} ${!p.model ? '<span class="pr-warn-badge" title="Edite o produto e preencha o campo Modelo">Sem modelo</span>' : ''}</div>
         <div class="pr-meta">
           ${priceHtml}
           <span class="pr-stock ${stockClass}">${stockLabel}</span>

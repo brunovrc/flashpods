@@ -390,8 +390,14 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
       <input type="hidden" id="p-id">
 
       <div class="form-group">
-        <label class="form-label" for="p-name">Nome do produto</label>
-        <input type="text" id="p-name" placeholder="Ex: Ignite 8.000 Puffs — Grape Ice" required>
+        <label class="form-label" for="p-model">Modelo</label>
+        <input type="text" id="p-model" placeholder="Ex: Ignite 8.000 Puffs">
+        <p class="field-hint">O modelo do pod (aparece junto do sabor em todo lugar, inclusive na mensagem do WhatsApp).</p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="p-name">Sabor / nome do produto</label>
+        <input type="text" id="p-name" placeholder="Ex: Grape Ice" required>
       </div>
 
       <div class="form-group">
@@ -823,12 +829,13 @@ function productRowHtml(p) {
     : `<i class="ph-package-bold"></i>`;
   const pauseIcon = isActive ? 'ph-pause-bold' : 'ph-play-bold';
   const pauseLabel = isActive ? 'Pausar (tirar do site)' : 'Reativar (mostrar no site)';
+  const fullName = p.model ? `${p.model} — ${p.name || ''}` : (p.name || '(sem nome)');
 
   return `
     <div class="product-row${isActive ? '' : ' is-paused'}">
       <div class="pr-thumb">${thumb}</div>
       <div class="pr-body">
-        <div class="pr-name">${escapeHtml(p.name || '(sem nome)')} ${!isActive ? '<span class="pr-paused-badge">Pausado</span>' : ''}</div>
+        <div class="pr-name">${escapeHtml(fullName)} ${!isActive ? '<span class="pr-paused-badge">Pausado</span>' : ''}</div>
         <div class="pr-meta">
           ${priceHtml}
           <span class="pr-stock ${stockClass}">${stockLabel}</span>
@@ -907,6 +914,7 @@ function openModal(productId) {
     if (!p) return;
     $('modal-title').textContent = 'Editar produto';
     $('p-id').value = p.id;
+    $('p-model').value = p.model || '';
     $('p-name').value = p.name || '';
     $('p-desc').value = p.description || '';
     $('p-cat').value = p.category || 'descartaveis';
@@ -958,6 +966,7 @@ $('product-form').addEventListener('submit', async (e) => {
   if (isNaN(stock) || stock < 0) { return showFormError('Informe o estoque (0 ou mais).'); }
 
   const data = {
+    model: $('p-model').value.trim(),
     name,
     description: $('p-desc').value.trim(),
     category: $('p-cat').value,

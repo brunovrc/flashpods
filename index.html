@@ -1523,6 +1523,7 @@ function startProductsListener() {
         return {
           id: d.id,
           cat: data.category || 'descartaveis',
+          model: data.model || '',
           name: data.name || '',
           desc: data.description || '',
           price: Number(data.price) || 0,
@@ -1885,8 +1886,10 @@ function buildProductCard(product) {
   card.className = 'product-card reveal';
   card.dataset.cat = product.cat;
 
+  const fullName = product.model ? `${product.model} — ${product.name}` : product.name;
+
   const thumb = product.img
-    ? `<img src="${product.img}" alt="${escapeHtml(product.name)}" class="product-img" loading="lazy">`
+    ? `<img src="${product.img}" alt="${escapeHtml(fullName)}" class="product-img" loading="lazy">`
     : `<i class="${CAT_ICONS[product.cat] || 'ph-package-bold'}"></i>`;
 
   const hasPromo = product.promoPrice && product.promoPrice < product.price;
@@ -1907,7 +1910,7 @@ function buildProductCard(product) {
     </div>
     <div class="product-body">
       <span class="product-cat">${CAT_NAMES[product.cat] || product.cat}</span>
-      <h3 class="product-name">${escapeHtml(product.name)}</h3>
+      <h3 class="product-name">${escapeHtml(fullName)}</h3>
       <p class="product-desc">${escapeHtml(product.desc)}</p>
       ${stockHtml}
       <div class="product-footer">
@@ -1969,7 +1972,8 @@ function addToCart(productId, qty, price) {
   } else {
     const p = PRODUCTS.find(p => p.id === productId);
     if (!p) return;
-    state.cart.push({ id: p.id, name: p.name, price: price != null ? price : p.price, cat: p.cat, img: p.img || null, qty });
+    const fullName = p.model ? `${p.model} — ${p.name}` : p.name;
+    state.cart.push({ id: p.id, name: fullName, price: price != null ? price : p.price, cat: p.cat, img: p.img || null, qty });
   }
   saveCart();
   renderCart();

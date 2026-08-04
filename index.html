@@ -398,6 +398,18 @@
 
   /* ── PRODUTOS ────────────────────────────────────────── */
   #produtos { background: var(--bg); scroll-margin-top: 146px; }
+  .promo-strip {
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    max-width: 480px; margin: 0 auto 32px; padding: 12px 20px;
+    border: 1px solid rgba(0,69,241,.22); background: var(--blue-dim);
+    border-radius: 100px; color: var(--blue-dk);
+    font-size: 13.5px; font-weight: 400; text-align: center; line-height: 1.4;
+  }
+  .promo-strip strong { font-weight: 700; color: var(--blue); }
+  .promo-strip i { font-size: 18px; color: var(--blue); flex-shrink: 0; }
+  @media (max-width: 520px) {
+    .promo-strip { font-size: 12.5px; padding: 10px 16px; }
+  }
   .cat-filter {
     display: flex; gap: 8px; overflow-x: auto; flex-wrap: nowrap;
     padding-bottom: 4px; margin-bottom: 44px; scrollbar-width: none;
@@ -571,7 +583,19 @@
   }
   .cart-total-label { font-size: 13px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
   .cart-line-val { font-size: 14px; font-weight: 600; color: var(--text); }
+  .cart-discount-val { color: #1FAE5C !important; }
   .cart-total-val { font-family: var(--font-d); font-size: 22px; font-weight: 800; color: var(--blue); }
+  .cart-promo {
+    display: flex; align-items: center; gap: 8px;
+    border-radius: var(--radius); padding: 10px 12px;
+    font-size: 12.5px; font-weight: 500; line-height: 1.4;
+    margin: 12px 0; border: 1px solid rgba(0,69,241,.22);
+    background: var(--blue-dim); color: var(--blue-dk);
+  }
+  .cart-promo.hidden { display: none; }
+  .cart-promo i { flex-shrink: 0; font-size: 16px; color: var(--blue); }
+  .cart-promo.is-earned { border-color: rgba(31,174,92,.3); background: rgba(31,174,92,.09); color: #17924c; }
+  .cart-promo.is-earned i { color: #1FAE5C; }
   .cart-disclaimer {
     font-size: 12px; color: var(--subtle); margin: 10px 0 18px;
     line-height: 1.55; text-align: center;
@@ -804,6 +828,10 @@
     .header-nav { display: none; }
     #status-bar { font-size: 11.5px; padding: 0 8px; }
     #como-funciona, #produtos, #entrega, #localizacao { scroll-margin-top: 106px; }
+    /* No mobile o site abre direto nos produtos — hero fica pesada (2 vídeos) e gerava reclamação de travamento */
+    main { display: flex; flex-direction: column; }
+    #hero { display: none; }
+    #produtos { order: -1; }
     .header-nav.open {
       display: flex;
       position: fixed; top: 106px; left: 0; right: 0;
@@ -1055,6 +1083,10 @@
     <span class="section-tag reveal">Catálogo</span>
     <h2 class="section-title reveal">Produtos</h2>
     <p class="section-sub reveal">Escolha o que quiser, defina a quantidade e adicione ao pedido. Preços e disponibilidade confirmados pela equipe.</p>
+    <div class="promo-strip reveal">
+      <i class="ph-fill ph-seal-percent"></i>
+      Leve <strong>2 pods ou mais</strong> e ganhe <strong>10% de desconto</strong> automático no carrinho
+    </div>
     <div class="divider reveal"></div>
     <div class="cat-filter" id="cat-filter" role="group" aria-label="Filtro por categoria"></div>
     <div class="products-grid" id="products-grid" aria-label="Lista de produtos">
@@ -1290,6 +1322,10 @@
       <span class="cart-total-label">Subtotal</span>
       <span class="cart-line-val" id="cart-subtotal">R$&nbsp;0,00</span>
     </div>
+    <div class="cart-total-row" id="cart-discount-row" style="display:none">
+      <span class="cart-total-label">Desconto (2+ pods)</span>
+      <span class="cart-line-val cart-discount-val" id="cart-discount">-R$&nbsp;0,00</span>
+    </div>
     <div class="cart-total-row">
       <span class="cart-total-label">Frete</span>
       <span class="cart-line-val" id="cart-fee">Grátis</span>
@@ -1298,6 +1334,7 @@
       <span class="cart-total-label">Total estimado</span>
       <span class="cart-total-val" id="cart-total">R$&nbsp;0,00</span>
     </div>
+    <div class="cart-promo hidden" id="cart-promo-note"></div>
     <p class="cart-disclaimer">
       Valores e disponibilidade confirmados pela equipe no WhatsApp após o envio do pedido.
     </p>
@@ -1343,6 +1380,10 @@
       <div class="co-sum-item">
         <span>Subtotal</span>
         <span id="co-subtotal">R$&nbsp;0,00</span>
+      </div>
+      <div class="co-sum-item" id="co-discount-row" style="display:none">
+        <span>Desconto (2+ pods)</span>
+        <span id="co-discount" class="cart-discount-val">-R$&nbsp;0,00</span>
       </div>
       <div class="co-sum-item">
         <span>Frete</span>
@@ -1574,6 +1615,11 @@ function startCategoriesListener() {
 ───────────────────────────────────────────────────────── */
 const DELIVERY_FEES = { maringa: 0, sarandi: 15 };
 const ZONE_NAMES = { maringa: 'Maringá', sarandi: 'Sarandi' };
+
+/* ─────────────────────────────────────────────────────────
+   PROMOÇÃO — 2 pods ou mais = 10% off no subtotal
+───────────────────────────────────────────────────────── */
+const PROMO = { minQty: 2, rate: 0.10 };
 
 /* ─────────────────────────────────────────────────────────
    PIX — QR Code + copia-e-cola (BR Code / EMVCo), sem backend
@@ -2003,8 +2049,11 @@ function removeFromCart(productId) {
 ───────────────────────────────────────────────────────── */
 function getTotals() {
   const subtotal = state.cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const totalQty = state.cart.reduce((s, i) => s + i.qty, 0);
+  const discountActive = totalQty >= PROMO.minQty;
+  const discount = discountActive ? subtotal * PROMO.rate : 0;
   const fee = state.deliveryZone ? DELIVERY_FEES[state.deliveryZone] : 0;
-  return { subtotal, fee, total: subtotal + fee };
+  return { subtotal, totalQty, discountActive, discount, fee, total: subtotal - discount + fee };
 }
 
 function feeLabel(fee) {
@@ -2019,14 +2068,33 @@ function renderZonePills() {
 }
 
 function renderTotals() {
-  const { subtotal, fee, total } = getTotals();
+  const { subtotal, totalQty, discountActive, discount, fee, total } = getTotals();
   if ($('cart-subtotal')) $('cart-subtotal').textContent = fmt(subtotal);
+  if ($('cart-discount-row')) $('cart-discount-row').style.display = discountActive ? 'flex' : 'none';
+  if ($('cart-discount')) $('cart-discount').textContent = '-' + fmt(discount);
   if ($('cart-fee')) $('cart-fee').textContent = feeLabel(fee);
   if ($('cart-total')) $('cart-total').textContent = fmt(total);
   if ($('co-subtotal')) $('co-subtotal').textContent = fmt(subtotal);
+  if ($('co-discount-row')) $('co-discount-row').style.display = discountActive ? 'flex' : 'none';
+  if ($('co-discount')) $('co-discount').textContent = '-' + fmt(discount);
   if ($('co-fee')) $('co-fee').textContent = feeLabel(fee);
   if ($('co-total')) $('co-total').textContent = fmt(total);
   renderZonePills();
+  renderPromoNote(totalQty, discountActive);
+}
+
+function renderPromoNote(totalQty, discountActive) {
+  const el = $('cart-promo-note');
+  if (!el) return;
+  if (totalQty <= 0) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden');
+  el.classList.toggle('is-earned', discountActive);
+  if (discountActive) {
+    el.innerHTML = `<i class="ph-fill ph-seal-percent"></i> 10% de desconto aplicado — 2 pods ou mais.`;
+  } else {
+    const falta = PROMO.minQty - totalQty;
+    el.innerHTML = `<i class="ph-bold ph-seal-percent"></i> Adicione mais ${falta} pod${falta > 1 ? 's' : ''} e ganhe 10% de desconto.`;
+  }
 }
 
 function setZone(zone) {
@@ -2209,9 +2277,10 @@ function buildWhatsAppMessage(data) {
     `*${i.name}* — Qtd: ${i.qty} — ${fmt(i.price * i.qty)}`
   ).join('\n');
 
-  const { subtotal, fee, total } = getTotals();
+  const { subtotal, discountActive, discount, fee, total } = getTotals();
   const zoneName = state.deliveryZone ? ZONE_NAMES[state.deliveryZone] : '—';
   const feeLine = state.deliveryZone ? (fee > 0 ? fmt(fee) : 'Grátis') : 'A confirmar';
+  const discountBlock = discountActive ? `\n*DESCONTO (2+ pods)*\n-${fmt(discount)}\n` : '';
 
   const entregaLines = `
 *ENDEREÇO DE ENTREGA*
@@ -2244,7 +2313,7 @@ ${items}
 
 *SUBTOTAL*
 ${fmt(subtotal)}
-
+${discountBlock}
 *FRETE (${zoneName})*
 ${feeLine}
 
@@ -2256,6 +2325,21 @@ ${entregaLines}
 ${data.pagamento || 'Pix'}${data.pagamento === 'Dinheiro' && data.troco?.trim() ? `\nTroco para: ${data.troco.trim()}` : ''}${obsLine}
 
 ${outro}`;
+}
+
+/* ─────────────────────────────────────────────────────────
+   HERO — no mobile o site abre direto em produtos (a hero some
+   via CSS); aqui garantimos que os 2 vídeos nem cheguem a
+   carregar, que era a causa real da sensação de travamento.
+───────────────────────────────────────────────────────── */
+function initMobileHeroSkip() {
+  if (!window.matchMedia('(max-width: 768px)').matches) return;
+  $$('#hero video').forEach(v => {
+    v.pause();
+    v.removeAttribute('autoplay');
+    v.removeAttribute('src');
+    v.load();
+  });
 }
 
 /* ─────────────────────────────────────────────────────────
@@ -2406,6 +2490,7 @@ function init() {
   window.scrollTo({ top: 0, behavior: 'instant' });
   updateStoreStatus();
   setInterval(updateStoreStatus, 60000);
+  initMobileHeroSkip();
   initHeader();
   initWhatsAppLinks();
   startStoreSettingsListener();

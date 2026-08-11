@@ -65,7 +65,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/phosphor-icons@1.4.2/src/css/icons.css">
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js" defer></script>
 
   <style>
   /* ── TOKENS ─────────────────────────────────────────── */
@@ -1526,7 +1526,7 @@
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import {
-  getFirestore, collection, onSnapshot, doc
+  initializeFirestore, collection, onSnapshot, doc, updateDoc, increment
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -1538,7 +1538,13 @@ const firebaseConfig = {
   appId: "1:643677174333:web:f0ed75b2ba08d294954854",
 };
 const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
+/* experimentalAutoDetectLongPolling: contorna proxies de operadora de
+   celular que travam o streaming padrão do Firestore (WebChannel) —
+   causa comum de "não carrega" só em rede móvel. */
+const db = initializeFirestore(firebaseApp, {
+  experimentalAutoDetectLongPolling: true,
+  useFetchStreams: false,
+});
 
 /* ─────────────────────────────────────────────────────────
    CONFIG — ALTERE AQUI
@@ -1570,8 +1576,28 @@ function startStoreSettingsListener() {
 ───────────────────────────────────────────────────────── */
 let PRODUCTS = [];
 
+function showProductsFallback(message) {
+  const grid = $('products-grid');
+  if (!grid) return;
+  grid.innerHTML = `
+    <div style="grid-column:1/-1;text-align:center;padding:40px 0">
+      <p style="color:var(--muted);margin-bottom:16px">${message}</p>
+      <button class="btn btn-outline btn-sm" id="products-retry-btn">Tentar novamente</button>
+    </div>`;
+  $('products-retry-btn')?.addEventListener('click', () => location.reload());
+}
+
 function startProductsListener() {
+  let received = false;
+  // Se em ~9s nada chegou (conexão lenta/instável), mostra aviso com opção de tentar de novo
+  // em vez de deixar "Carregando produtos…" parado pra sempre.
+  const timeoutId = setTimeout(() => {
+    if (!received) showProductsFallback('Isso está demorando mais que o normal. Verifique sua conexão com a internet.');
+  }, 9000);
+
   onSnapshot(collection(db, 'products'), (snap) => {
+    received = true;
+    clearTimeout(timeoutId);
     PRODUCTS = snap.docs
       .map(d => {
         const data = d.data();
@@ -1591,8 +1617,9 @@ function startProductsListener() {
       .filter(p => p.active);
     renderCatalog();
   }, (err) => {
-    const grid = $('products-grid');
-    if (grid) grid.innerHTML = `<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:40px 0">Não foi possível carregar os produtos agora. Tente recarregar a página.</p>`;
+    received = true;
+    clearTimeout(timeoutId);
+    showProductsFallback('Não foi possível carregar os produtos agora.');
     console.error('Erro ao carregar produtos:', err);
   });
 }
@@ -2059,6 +2086,21 @@ function removeFromCart(productId) {
 }
 
 /* ─────────────────────────────────────────────────────────
+   ESTOQUE — desconta automaticamente quando o pedido é enviado.
+   Usa increment() atômico: seguro mesmo se dois clientes comprarem
+   o mesmo produto ao mesmo tempo. As regras do Firestore garantem
+   que o estoque nunca fique negativo (se faltar, a baixa daquele
+   item simplesmente não é aplicada — o pedido no WhatsApp continua
+   normal, e a equipe confirma a disponibilidade real por lá).
+───────────────────────────────────────────────────────── */
+function decrementStockForOrder(cartItems) {
+  return Promise.all(cartItems.map(item =>
+    updateDoc(doc(db, 'products', item.id), { stock: increment(-item.qty) })
+      .catch(err => console.error('Erro ao baixar estoque de', item.id, err))
+  ));
+}
+
+/* ─────────────────────────────────────────────────────────
    ENTREGA — CIDADE E FRETE
 ───────────────────────────────────────────────────────── */
 function getTotals() {
@@ -2404,10 +2446,16 @@ function initEvents() {
   $('checkout-form').addEventListener('submit', e => {
     e.preventDefault();
     if (!getStoreStatus().isOpen) { updateOrderingAvailability(); return; }
+    if ($('send-btn').disabled) return;
     const data = getFormData();
     if (!validateForm(data)) return;
     const msg = buildWhatsAppMessage(data);
     window.open(waLink(msg), '_blank', 'noopener,noreferrer');
+    // Trava o botão por alguns segundos pra evitar duplo clique baixando o estoque 2x
+    $('send-btn').disabled = true;
+    decrementStockForOrder(state.cart).finally(() => {
+      setTimeout(() => { $('send-btn').disabled = false; }, 4000);
+    });
   });
 
   // Keyboard close

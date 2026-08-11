@@ -1095,9 +1095,9 @@
     <h2 class="section-title reveal">Produtos</h2>
     <p class="section-sub reveal">Escolha o que quiser, defina a quantidade e adicione ao pedido. Preços e disponibilidade confirmados pela equipe.</p>
     <div class="promo-strip reveal">
-      <span class="promo-icon"><i class="ph-fill ph-seal-percent"></i></span>
+      <span class="promo-icon"><i class="ph-percent-bold"></i></span>
       <span class="promo-copy">
-        <strong>2 pods ou mais, 10% de desconto</strong>
+        <strong>2 pods ou mais, 7% de desconto</strong>
         <span>Aplicado automaticamente no carrinho, sem cupom</span>
       </span>
     </div>
@@ -1658,9 +1658,9 @@ const DELIVERY_FEES = { maringa: 0, sarandi: 15 };
 const ZONE_NAMES = { maringa: 'Maringá', sarandi: 'Sarandi' };
 
 /* ─────────────────────────────────────────────────────────
-   PROMOÇÃO — 2 pods ou mais = 10% off no subtotal
+   PROMOÇÃO — 2 pods ou mais = 7% off no subtotal
 ───────────────────────────────────────────────────────── */
-const PROMO = { minQty: 2, rate: 0.10 };
+const PROMO = { minQty: 2, rate: 0.07 };
 
 /* ─────────────────────────────────────────────────────────
    PIX — QR Code + copia-e-cola (BR Code / EMVCo), sem backend
@@ -2146,10 +2146,10 @@ function renderPromoNote(totalQty, discountActive) {
   el.classList.remove('hidden');
   el.classList.toggle('is-earned', discountActive);
   if (discountActive) {
-    el.innerHTML = `<i class="ph-fill ph-seal-percent"></i> 10% de desconto aplicado — 2 pods ou mais.`;
+    el.innerHTML = `<i class="ph-percent-bold"></i> 7% de desconto aplicado — 2 pods ou mais.`;
   } else {
     const falta = PROMO.minQty - totalQty;
-    el.innerHTML = `<i class="ph-bold ph-seal-percent"></i> Adicione mais ${falta} pod${falta > 1 ? 's' : ''} e ganhe 10% de desconto.`;
+    el.innerHTML = `<i class="ph-percent-bold"></i> Adicione mais ${falta} pod${falta > 1 ? 's' : ''} e ganhe 7% de desconto.`;
   }
 }
 

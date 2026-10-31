@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Painel — Flash Pods</title>
 <meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0045F1">
 <link rel="icon" type="image/png" href="../favicon.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,24 +23,30 @@
   --blue:      #0045F1;
   --blue-dk:   #0033B8;
   --blue-dim:  rgba(0,69,241,.08);
+  --green:     #1FAE5C;
+  --red:       #C13B3B;
+  --amber:     #B87914;
   --text:      #12141C;
   --muted:     #5B6178;
   --subtle:    #9198AC;
   --radius:    6px;
-  --radius-lg: 12px;
+  --radius-lg: 10px;
   --tr:        180ms ease;
   --font:      'Inter', sans-serif;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+a, button, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 body {
   background: var(--surface); color: var(--text);
   font-family: var(--font); font-weight: 400; line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
+body.modal-open { overflow: hidden; }
 img { display: block; max-width: 100%; }
 a { color: inherit; }
-button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; font-size: inherit; text-align: inherit; }
+button:disabled { cursor: not-allowed; }
 ul { list-style: none; }
 input, select, textarea {
   font-family: var(--font); font-size: 16px;
@@ -55,21 +62,21 @@ textarea { resize: vertical; min-height: 70px; }
 /* ── BUTTONS ─────────────────────────────────────────── */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 11px 20px; border-radius: var(--radius);
-  font-size: 14px; font-weight: 600; cursor: pointer;
+  padding: 11px 18px; border-radius: var(--radius);
+  font-size: 14px; font-weight: 600;
   transition: all var(--tr); white-space: nowrap; border: 1px solid transparent;
 }
 .btn-primary { background: var(--blue); color: #fff; }
 .btn-primary:hover { background: var(--blue-dk); }
-.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-primary:disabled { opacity: .5; }
 .btn-outline { border-color: var(--border-em); color: var(--text); background: var(--card); }
 .btn-outline:hover { border-color: var(--blue); color: var(--blue); }
 .btn-ghost { color: var(--muted); padding: 11px 14px; }
 .btn-ghost:hover { color: var(--text); }
-.btn-danger { color: #C13B3B; }
+.btn-danger { color: var(--red); }
 .btn-danger:hover { background: rgba(193,59,59,.08); }
 .btn-full { width: 100%; }
-.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-sm { padding: 8px 12px; font-size: 13px; }
 
 /* ── LOGIN ───────────────────────────────────────────── */
 #login-screen {
@@ -78,203 +85,199 @@ textarea { resize: vertical; min-height: 70px; }
 }
 .login-card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 44px 36px;
+  border-radius: var(--radius-lg); padding: 40px 28px;
   max-width: 380px; width: 100%;
   box-shadow: 0 8px 40px rgba(18,20,28,.06);
 }
 .login-logo { height: 56px; width: auto; margin: 0 auto 28px; display: block; }
-.login-card h1 {
-  font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 6px;
-}
-.login-card .sub {
-  font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 28px;
-}
+.login-card h1 { font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 6px; }
+.login-card .sub { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 28px; }
 .form-group { margin-bottom: 14px; }
 .form-label {
   display: block; font-size: 12px; font-weight: 600; color: var(--muted);
   text-transform: uppercase; letter-spacing: .03em; margin-bottom: 6px;
 }
-.login-error {
+.login-error, .form-error {
   background: rgba(193,59,59,.08); border: 1px solid rgba(193,59,59,.25);
-  color: #C13B3B; font-size: 13px; padding: 10px 14px; border-radius: var(--radius);
-  margin-bottom: 16px; display: none;
+  color: var(--red); font-size: 13px; padding: 10px 14px; border-radius: var(--radius);
+  margin-bottom: 14px; display: none;
 }
-.login-error.show { display: block; }
+.login-error.show, .form-error.show { display: block; }
 
 /* ── HEADER ──────────────────────────────────────────── */
-#header {
-  background: var(--blue); position: sticky; top: 0; z-index: 50;
-  border-bottom: 1px solid rgba(255,255,255,.14);
-}
+#header { background: var(--blue); position: sticky; top: 0; z-index: 50; }
 .header-inner {
-  display: flex; align-items: center; justify-content: space-between;
-  max-width: 1080px; margin: 0 auto; padding: 14px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  max-width: 760px; margin: 0 auto; padding: 12px 16px;
 }
-.header-logo { height: 40px; width: auto; }
-.header-right { display: flex; align-items: center; gap: 14px; }
-.header-user { font-size: 13px; color: rgba(255,255,255,.85); }
-#logout-btn { color: #fff; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: var(--radius); }
+.header-logo { height: 34px; width: auto; }
+.header-right { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.header-user { font-size: 12.5px; color: rgba(255,255,255,.85); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#logout-btn { color: #fff; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: var(--radius); flex-shrink: 0; }
 #logout-btn:hover { background: rgba(255,255,255,.12); }
 
 /* ── LAYOUT ──────────────────────────────────────────── */
-main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
-.toolbar {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
-}
-.toolbar h1 { font-size: 22px; font-weight: 800; }
-.toolbar .sub { font-size: 13px; color: var(--muted); margin-top: 2px; }
-
-.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 12px; margin-bottom: 28px; }
-.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
-.stat-num { font-size: 24px; font-weight: 800; color: var(--blue); }
-.stat-label { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-/* ── STATUS DA LOJA ──────────────────────────────────── */
-.store-status-card {
+main { max-width: 760px; margin: 0 auto; padding: 18px 16px 100px; }
+.card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 24px;
+  border-radius: var(--radius-lg); padding: 18px; margin-bottom: 14px;
 }
-.store-status-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
-.store-status-head h2 { font-size: 15px; font-weight: 800; }
-.store-status-head .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.card-head h2 { font-size: 15px; font-weight: 800; }
+.card-head .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.field-hint { font-size: 12px; color: var(--subtle); margin-top: 5px; }
+
 .store-status-pill {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12.5px; font-weight: 700; padding: 6px 12px; border-radius: 20px;
-  white-space: nowrap;
+  font-size: 12.5px; font-weight: 700; padding: 6px 12px; border-radius: 20px; white-space: nowrap;
 }
-.store-status-pill.open { background: rgba(31,174,92,.1); color: #1FAE5C; }
+.store-status-pill.open { background: rgba(31,174,92,.1); color: var(--green); }
 .store-status-pill.closed { background: rgba(145,152,172,.14); color: var(--muted); }
-#store-toggle-btn.btn-close-store { background: #C13B3B; }
+#store-toggle-btn.btn-close-store { background: var(--red); }
 #store-toggle-btn.btn-close-store:hover { background: #A32F2F; }
 #store-auto-btn { margin-top: 8px; }
 
-/* ── CATEGORIAS ──────────────────────────────────────── */
-.cat-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.cat-chip {
-  display: flex; align-items: center; gap: 8px;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 20px; padding: 6px 8px 6px 14px;
-  font-size: 13px; font-weight: 600; color: var(--text);
-}
-.cat-chip-count { color: var(--muted); font-weight: 500; }
-.cat-chip-del {
-  width: 20px; height: 20px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--subtle); font-size: 12px; transition: all var(--tr);
-}
-.cat-chip-del:hover { background: rgba(193,59,59,.1); color: #C13B3B; }
-.cat-add-form { display: flex; gap: 8px; }
-.cat-add-form input { flex: 1; }
-.cat-add-form .btn { flex-shrink: 0; }
-.empty-cats { font-size: 13px; color: var(--muted); }
+.inline-form { display: flex; gap: 8px; }
+.inline-form .input-suffix { position: relative; flex: 1; }
+.inline-form .input-suffix input { padding-right: 34px; }
+.inline-form .input-suffix span { position: absolute; right: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); font-weight: 600; }
 
-/* ── PRODUCT LIST ────────────────────────────────────── */
-.cat-group { margin-bottom: 32px; }
-.cat-group-title {
-  font-size: 13px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .04em; color: var(--muted); margin-bottom: 12px;
-  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+.toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin: 26px 0 14px; flex-wrap: wrap;
 }
-.product-row {
-  display: flex; align-items: center; gap: 14px;
+.toolbar h1 { font-size: 21px; font-weight: 800; }
+.toolbar .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px; }
+.stat-num { font-size: 21px; font-weight: 800; color: var(--blue); line-height: 1.2; }
+.stat-num.warn { color: var(--amber); }
+.stat-label { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+
+.search-box { position: relative; margin-bottom: 14px; }
+.search-box i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--subtle); font-size: 17px; pointer-events: none; }
+.search-box input { padding-left: 40px; }
+
+/* ── MODELOS ─────────────────────────────────────────── */
+.model-card {
   background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 12px; margin-bottom: 10px;
-  transition: opacity var(--tr);
+  border-radius: var(--radius-lg); margin-bottom: 10px; overflow: hidden;
 }
-.product-row.is-paused { opacity: .55; }
-.pr-paused-badge {
-  display: inline-block; font-size: 10.5px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .03em; color: var(--subtle);
-  background: var(--surface); border: 1px solid var(--border-em);
-  padding: 2px 8px; border-radius: 20px; margin-left: 6px; vertical-align: middle;
-}
-.pr-warn-badge {
-  display: inline-block; font-size: 10.5px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .03em; color: #B87914;
-  background: rgba(184,121,20,.1); border: 1px solid rgba(184,121,20,.28);
-  padding: 2px 8px; border-radius: 20px; margin-left: 6px; vertical-align: middle;
-  cursor: help;
-}
-.pr-thumb {
-  width: 56px; height: 56px; border-radius: var(--radius);
+.model-card.is-paused .mc-head { opacity: .55; }
+.mc-head { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px; }
+.mc-thumb, .fl-thumb {
+  width: 54px; height: 54px; border-radius: var(--radius);
   background: var(--surface); flex-shrink: 0; overflow: hidden;
   display: flex; align-items: center; justify-content: center;
 }
-.pr-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.pr-thumb i { font-size: 22px; color: var(--subtle); }
-.pr-body { flex: 1; min-width: 0; }
-.pr-name { font-size: 14.5px; font-weight: 600; margin-bottom: 2px; overflow-wrap: break-word; }
-.pr-meta { font-size: 12.5px; color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; }
-.pr-price { font-weight: 700; color: var(--blue); }
-.pr-price-old { text-decoration: line-through; color: var(--subtle); margin-right: 4px; font-weight: 400; }
-.pr-stock { font-weight: 600; }
-.pr-stock.zero { color: #C13B3B; }
-.pr-stock.low { color: #B87914; }
-.pr-actions { display: flex; gap: 6px; flex-shrink: 0; }
-.pr-icon-btn {
-  width: 34px; height: 34px; border-radius: var(--radius);
-  display: flex; align-items: center; justify-content: center;
-  border: 1px solid var(--border-em); color: var(--muted); font-size: 15px;
-  transition: all var(--tr);
+.mc-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.mc-thumb i { font-size: 22px; color: var(--subtle); }
+.mc-body { flex: 1; min-width: 0; }
+.mc-name { font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+.mc-meta { font-size: 12.5px; color: var(--muted); display: flex; gap: 4px 10px; flex-wrap: wrap; margin-top: 2px; }
+.mc-meta .price { font-weight: 700; color: var(--blue); }
+.mc-meta .out { color: var(--red); font-weight: 600; }
+.mc-caret { color: var(--subtle); font-size: 16px; transition: transform var(--tr); }
+.model-card.is-open .mc-caret { transform: rotate(180deg); }
+.badge {
+  display: inline-block; font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .03em;
+  padding: 2px 7px; border-radius: 4px; margin-left: 6px; vertical-align: 2px;
 }
-.pr-icon-btn:hover { border-color: var(--blue); color: var(--blue); }
-.pr-icon-btn.danger:hover { border-color: #C13B3B; color: #C13B3B; }
+.badge-paused { color: var(--subtle); background: var(--surface); border: 1px solid var(--border-em); }
+.badge-star { color: var(--blue); background: var(--blue-dim); }
+.badge-warn { color: var(--amber); background: rgba(184,121,20,.1); }
 
-.empty-state {
-  text-align: center; padding: 60px 20px; color: var(--muted);
+.mc-panel { border-top: 1px solid var(--border); }
+.mc-actions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; background: var(--surface); }
+.fl-list { }
+.fl-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 4px; border-top: 1px solid var(--border); min-height: 56px; }
+.fl-row.is-paused .fl-name-btn { opacity: .5; }
+.fl-name-btn { flex: 1; min-width: 0; padding: 8px; border-radius: var(--radius); }
+.fl-name-btn:hover { background: var(--surface); }
+.fl-name { display: block; font-size: 14.5px; font-weight: 600; overflow-wrap: anywhere; }
+.fl-sub { display: block; font-size: 12px; color: var(--muted); }
+.fl-sub .old { text-decoration: line-through; color: var(--subtle); }
+.stepper { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.stepper button {
+  width: 36px; height: 36px; border-radius: var(--radius); border: 1px solid var(--border-em);
+  display: flex; align-items: center; justify-content: center; color: var(--blue); font-size: 14px;
 }
+.stepper button:disabled { color: var(--border-em); border-color: var(--border); }
+.stepper .stock-num {
+  min-width: 42px; height: 36px; border-radius: var(--radius); padding: 0 6px;
+  font-size: 15px; font-weight: 800; text-align: center; color: var(--text); border: 1px solid transparent;
+}
+.stepper .stock-num:hover { border-color: var(--border-em); }
+.stepper .stock-num.zero { color: var(--red); }
+.stepper .stock-num.low { color: var(--amber); }
+.fl-empty { padding: 16px 12px; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); }
+
+.empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
 .empty-state i { font-size: 40px; color: var(--border-em); margin-bottom: 12px; display: block; }
 
-/* ── MODAL ───────────────────────────────────────────── */
-#product-modal {
+/* ── MODAL (sobe de baixo no celular) ───────────────── */
+.modal {
   position: fixed; inset: 0; z-index: 200;
   background: rgba(10,12,20,.55);
-  display: flex; align-items: flex-start; justify-content: center;
-  padding: 40px 16px; overflow-y: auto;
+  display: flex; align-items: flex-end; justify-content: center;
 }
 .modal-card {
-  background: var(--card); border-radius: var(--radius-lg);
-  padding: 28px; max-width: 480px; width: 100%;
+  background: var(--card); width: 100%; max-width: 520px;
+  border-radius: 14px 14px 0 0; max-height: 94vh; max-height: 94dvh;
+  display: flex; flex-direction: column;
 }
-.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 10px 8px 10px 18px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
 .modal-head h2 { font-size: 17px; font-weight: 800; }
-.modal-close { font-size: 20px; color: var(--muted); padding: 6px; }
-.modal-close:hover { color: var(--text); }
+.modal-close { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 19px; color: var(--muted); }
+.modal-body { padding: 18px; overflow-y: auto; overscroll-behavior: contain; flex: 1; }
+.modal-foot {
+  display: flex; gap: 8px; padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border); flex-shrink: 0;
+}
+.modal-foot .btn-primary { flex: 1; }
 .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.check-row {
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; margin-bottom: 14px;
+}
+.check-row input { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; accent-color: var(--blue); padding: 0; }
+.check-row strong { display: block; font-size: 14px; font-weight: 600; }
+.check-row span { display: block; font-size: 12.5px; color: var(--muted); }
 .image-drop {
   border: 1.5px dashed var(--border-em); border-radius: var(--radius);
-  padding: 16px; text-align: center; cursor: pointer; position: relative;
-  transition: border-color var(--tr);
+  padding: 12px; cursor: pointer; position: relative; transition: border-color var(--tr);
 }
 .image-drop:hover { border-color: var(--blue); }
 .image-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .image-preview-wrap { display: flex; align-items: center; gap: 12px; }
-#image-preview {
-  width: 64px; height: 64px; border-radius: var(--radius);
-  object-fit: cover; background: var(--surface); flex-shrink: 0;
+.image-box {
+  width: 64px; height: 64px; border-radius: var(--radius); background: var(--surface);
+  flex-shrink: 0; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
 }
+.image-box i { font-size: 24px; color: var(--subtle); }
+#image-preview { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#image-preview[src=""], #image-preview:not([src]) { display: none; }
 .image-drop-text { font-size: 13px; color: var(--muted); }
 .image-drop-text strong { color: var(--blue); }
-.field-hint { font-size: 11.5px; color: var(--subtle); margin-top: 5px; }
-.modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
-.form-error {
-  background: rgba(193,59,59,.08); border: 1px solid rgba(193,59,59,.25);
-  color: #C13B3B; font-size: 13px; padding: 10px 14px; border-radius: var(--radius);
-  margin-bottom: 14px; display: none;
-}
-.form-error.show { display: block; }
+.flavor-count { font-size: 12px; color: var(--blue); font-weight: 600; margin-top: 5px; }
+.danger-zone { margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* ── TOAST ───────────────────────────────────────────── */
 #toast {
-  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
-  background: var(--text); color: #fff; padding: 12px 20px; border-radius: var(--radius);
+  position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: #fff; padding: 12px 18px; border-radius: var(--radius);
   font-size: 13.5px; font-weight: 500; z-index: 300; opacity: 0; pointer-events: none;
   transition: all 220ms ease; display: flex; align-items: center; gap: 8px;
-  box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  box-shadow: 0 8px 24px rgba(0,0,0,.2); max-width: calc(100% - 32px);
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-#toast i { color: #3ECF7E; }
+#toast i { color: #3ECF7E; flex-shrink: 0; }
 #toast.error i { color: #E5605A; }
 
 /* ── LOADING ─────────────────────────────────────────── */
@@ -286,10 +289,16 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-@media (max-width: 560px) {
+@media (min-width: 640px) {
+  .modal { align-items: center; padding: 24px; }
+  .modal-card { border-radius: 14px; max-height: 90vh; }
+  .modal-foot { border-radius: 0 0 14px 14px; }
+  .mc-actions { grid-template-columns: repeat(4, 1fr); }
+  main { padding-top: 28px; }
+}
+@media (max-width: 380px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
   .form-row-2 { grid-template-columns: 1fr; }
-  .product-row { flex-wrap: wrap; }
-  .pr-actions { width: 100%; justify-content: flex-end; }
 }
 </style>
 </head>
@@ -300,7 +309,7 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
 ══════════════════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-card">
-    <img src="../logo-footer.png" alt="Flash Pods" class="login-logo">
+    <img src="../favicon.png" alt="Flash Pods" class="login-logo">
     <h1>Painel Flash Pods</h1>
     <p class="sub">Entre com seu e-mail e senha</p>
     <div class="login-error" id="login-error"></div>
@@ -335,8 +344,8 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
   </header>
 
   <main>
-    <div class="store-status-card">
-      <div class="store-status-head">
+    <div class="card">
+      <div class="card-head">
         <div>
           <h2>Status da loja</h2>
           <p class="sub" id="store-auto-info">Horário automático: carregando…</p>
@@ -349,112 +358,215 @@ main { max-width: 1080px; margin: 0 auto; padding: 32px 24px 80px; }
       </button>
     </div>
 
-    <div class="store-status-card">
-      <div class="store-status-head" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-head" style="margin-bottom:12px">
         <div>
-          <h2>Categorias</h2>
-          <p class="sub">Organize os produtos do site em categorias — crie quantas quiser</p>
+          <h2>Taxa do cartão de crédito</h2>
+          <p class="sub">Somada no total quando o cliente escolhe crédito. Coloque 0 pra não cobrar.</p>
         </div>
       </div>
-      <div class="cat-chip-row" id="cat-chip-row"></div>
-      <form id="cat-form" class="cat-add-form">
-        <input type="text" id="cat-name" placeholder="Nome da nova categoria (ex: Kits e refis)" maxlength="30">
-        <button type="submit" class="btn btn-outline btn-sm"><i class="ph-plus-bold"></i> Criar</button>
+      <form id="fee-form" class="inline-form">
+        <label class="input-suffix">
+          <input type="number" id="fee-rate" step="0.01" min="0" max="30" inputmode="decimal" placeholder="3.42" aria-label="Taxa do crédito em porcentagem">
+          <span>%</span>
+        </label>
+        <button type="submit" class="btn btn-outline" id="fee-save">Salvar</button>
       </form>
     </div>
 
     <div class="toolbar">
       <div>
-        <h1>Produtos</h1>
-        <p class="sub">Gerencie o catálogo que aparece no site</p>
+        <h1>Modelos</h1>
+        <p class="sub">Cada modelo tem a lista de sabores que o cliente marca no site</p>
       </div>
-      <button class="btn btn-primary" id="add-product-btn">
-        <i class="ph-plus-bold"></i> Adicionar produto
+      <button class="btn btn-primary" id="add-model-btn">
+        <i class="ph-plus-bold"></i> Novo modelo
       </button>
     </div>
 
     <div class="stats-row" id="stats-row"></div>
 
-    <div id="products-list">
-      <div class="loading-row"><span class="spinner"></span> Carregando produtos…</div>
+    <label class="search-box">
+      <i class="ph-magnifying-glass-bold"></i>
+      <input type="search" id="search" placeholder="Buscar modelo ou sabor" autocomplete="off">
+    </label>
+
+    <div id="models-list">
+      <div class="loading-row"><span class="spinner"></span> Carregando…</div>
     </div>
   </main>
 </div>
 
 <!-- ══════════════════════════════════════════════════════
-     MODAL — ADICIONAR/EDITAR PRODUTO
+     MODAL — MODELO (criar / editar)
 ══════════════════════════════════════════════════════ -->
-<div id="product-modal" class="hidden">
-  <div class="modal-card">
+<div id="model-modal" class="modal hidden">
+  <form class="modal-card" id="model-form" novalidate>
     <div class="modal-head">
-      <h2 id="modal-title">Adicionar produto</h2>
-      <button class="modal-close" id="modal-close"><i class="ph-x-bold"></i></button>
+      <h2 id="model-modal-title">Novo modelo</h2>
+      <button type="button" class="modal-close" data-close-modal><i class="ph-x-bold"></i></button>
     </div>
-
-    <div class="form-error" id="form-error"></div>
-
-    <form id="product-form">
-      <input type="hidden" id="p-id">
+    <div class="modal-body">
+      <div class="form-error" id="model-error"></div>
+      <input type="hidden" id="m-id">
 
       <div class="form-group">
-        <label class="form-label" for="p-model">Modelo</label>
-        <input type="text" id="p-model" placeholder="Ex: Ignite 8.000 Puffs">
-        <p class="field-hint">O modelo do pod (aparece junto do sabor em todo lugar, inclusive na mensagem do WhatsApp).</p>
+        <label class="form-label" for="m-name">Nome do modelo</label>
+        <input type="text" id="m-name" placeholder="Ex: Ignite V80 Ultra Slim" maxlength="60" required>
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="p-name">Sabor / nome do produto</label>
-        <input type="text" id="p-name" placeholder="Ex: Grape Ice" required>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="p-desc">Descrição</label>
-        <textarea id="p-desc" placeholder="Ex: Uva com toque de gelo. Até 8.000 puffs, nicotina 50mg"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="p-cat">Categoria</label>
-        <select id="p-cat"></select>
+        <label class="form-label" for="m-desc">Descrição</label>
+        <textarea id="m-desc" placeholder="Ex: 8.000 puffs, nicotina 50mg, recarregável"></textarea>
       </div>
 
       <div class="form-group form-row-2">
         <div>
-          <label class="form-label" for="p-price">Preço (R$)</label>
-          <input type="number" id="p-price" step="0.01" min="0" placeholder="69.90" required>
+          <label class="form-label" for="m-price">Preço (R$)</label>
+          <input type="number" id="m-price" step="0.01" min="0" inputmode="decimal" placeholder="100.00" required>
         </div>
         <div>
-          <label class="form-label" for="p-promo">Preço promocional</label>
-          <input type="number" id="p-promo" step="0.01" min="0" placeholder="Deixe em branco se não tiver">
+          <label class="form-label" for="m-promo">Preço promocional</label>
+          <input type="number" id="m-promo" step="0.01" min="0" inputmode="decimal" placeholder="Opcional">
         </div>
       </div>
-      <p class="field-hint" style="margin-top:-8px;margin-bottom:14px">Se preencher o promocional, ele precisa ser menor que o preço normal — o site mostra os dois, com o antigo riscado.</p>
 
-      <div class="form-group">
-        <label class="form-label" for="p-stock">Estoque (unidades)</label>
-        <input type="number" id="p-stock" step="1" min="0" placeholder="Ex: 4" required>
-        <p class="field-hint">Quando chegar a 0, o produto aparece como "Esgotado" no site.</p>
+      <label class="check-row hidden" id="m-apply-row">
+        <input type="checkbox" id="m-apply" checked>
+        <div>
+          <strong>Aplicar esse preço em todos os sabores</strong>
+          <span>Desmarque se alguns sabores têm preço diferente e você quer manter.</span>
+        </div>
+      </label>
+
+      <div id="m-new-flavors">
+        <div class="form-group">
+          <label class="form-label" for="m-flavors">Sabores (um por linha)</label>
+          <textarea id="m-flavors" rows="6" placeholder="Grape Ice&#10;Icy Mint&#10;Menthol&#10;Passion Fruit Sour Kiwi"></textarea>
+          <p class="flavor-count" id="m-flavors-count"></p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="m-stock">Estoque inicial de cada sabor</label>
+          <input type="number" id="m-stock" step="1" min="0" inputmode="numeric" value="1">
+          <p class="field-hint">Depois é só ajustar sabor por sabor no − e + da lista.</p>
+        </div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">Foto do produto</label>
+        <label class="form-label">Foto do modelo</label>
         <div class="image-drop">
-          <input type="file" id="p-image" accept="image/*">
+          <input type="file" id="m-image" accept="image/*">
           <div class="image-preview-wrap">
-            <img id="image-preview" src="" alt="">
-            <span class="image-drop-text"><strong>Clique</strong> ou arraste uma foto aqui</span>
+            <span class="image-box"><i class="ph-image-bold"></i><img id="image-preview" src="" alt=""></span>
+            <span class="image-drop-text"><strong>Toque</strong> pra escolher uma foto</span>
           </div>
         </div>
         <p class="field-hint" id="image-status"></p>
+        <button type="button" class="btn btn-ghost btn-sm hidden" id="image-remove" style="padding-left:0">Remover foto</button>
       </div>
 
-      <div class="modal-actions">
-        <button type="submit" class="btn btn-primary btn-full" id="save-btn">
-          <i class="ph-check-bold"></i> Salvar produto
-        </button>
-        <button type="button" class="btn btn-ghost btn-full" id="modal-cancel">Cancelar</button>
+      <label class="check-row">
+        <input type="checkbox" id="m-featured">
+        <div>
+          <strong>Mostrar em Destaques</strong>
+          <span>Aparece no carrossel do topo do site.</span>
+        </div>
+      </label>
+
+      <div class="form-group">
+        <label class="form-label" for="m-order">Posição na lista</label>
+        <input type="number" id="m-order" step="1" min="1" inputmode="numeric" placeholder="Deixe em branco pra ordem alfabética">
+        <p class="field-hint">1 aparece primeiro. Modelos sem número vêm depois, em ordem alfabética.</p>
       </div>
-    </form>
-  </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancelar</button>
+      <button type="submit" class="btn btn-primary" id="model-save"><i class="ph-check-bold"></i> Salvar</button>
+    </div>
+  </form>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL — ADICIONAR SABORES
+══════════════════════════════════════════════════════ -->
+<div id="flavors-modal" class="modal hidden">
+  <form class="modal-card" id="flavors-form" novalidate>
+    <div class="modal-head">
+      <h2>Adicionar sabores</h2>
+      <button type="button" class="modal-close" data-close-modal><i class="ph-x-bold"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-error" id="flavors-error"></div>
+      <input type="hidden" id="af-model">
+      <p class="field-hint" style="margin:0 0 14px;font-size:13px;color:var(--muted)" id="af-model-name"></p>
+      <div class="form-group">
+        <label class="form-label" for="af-names">Sabores (um por linha)</label>
+        <textarea id="af-names" rows="7" placeholder="Grape Ice&#10;Icy Mint&#10;Menthol"></textarea>
+        <p class="flavor-count" id="af-count"></p>
+      </div>
+      <div class="form-group form-row-2">
+        <div>
+          <label class="form-label" for="af-stock">Estoque de cada</label>
+          <input type="number" id="af-stock" step="1" min="0" inputmode="numeric" value="1">
+        </div>
+        <div>
+          <label class="form-label" for="af-price">Preço (R$)</label>
+          <input type="number" id="af-price" step="0.01" min="0" inputmode="decimal">
+        </div>
+      </div>
+      <p class="field-hint">Sabores que já existem nesse modelo são ignorados.</p>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancelar</button>
+      <button type="submit" class="btn btn-primary" id="flavors-save"><i class="ph-plus-bold"></i> Adicionar</button>
+    </div>
+  </form>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL — EDITAR SABOR
+══════════════════════════════════════════════════════ -->
+<div id="flavor-modal" class="modal hidden">
+  <form class="modal-card" id="flavor-form" novalidate>
+    <div class="modal-head">
+      <h2>Editar sabor</h2>
+      <button type="button" class="modal-close" data-close-modal><i class="ph-x-bold"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-error" id="flavor-error"></div>
+      <input type="hidden" id="f-id">
+      <div class="form-group">
+        <label class="form-label" for="f-name">Sabor</label>
+        <input type="text" id="f-name" maxlength="60" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-cat">Modelo</label>
+        <select id="f-cat"></select>
+      </div>
+      <div class="form-group form-row-2">
+        <div>
+          <label class="form-label" for="f-price">Preço (R$)</label>
+          <input type="number" id="f-price" step="0.01" min="0" inputmode="decimal" required>
+        </div>
+        <div>
+          <label class="form-label" for="f-promo">Promocional</label>
+          <input type="number" id="f-promo" step="0.01" min="0" inputmode="decimal" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-stock">Estoque</label>
+        <input type="number" id="f-stock" step="1" min="0" inputmode="numeric" required>
+      </div>
+      <div class="danger-zone">
+        <button type="button" class="btn btn-outline btn-sm" id="f-toggle"></button>
+        <button type="button" class="btn btn-danger btn-sm" id="f-delete"><i class="ph-trash-bold"></i> Excluir sabor</button>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn btn-ghost" data-close-modal>Cancelar</button>
+      <button type="submit" class="btn btn-primary" id="flavor-save"><i class="ph-check-bold"></i> Salvar</button>
+    </div>
+  </form>
 </div>
 
 <div id="toast"><i class="ph-check-circle-bold"></i><span id="toast-text"></span></div>
@@ -465,7 +577,8 @@ import {
   getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import {
-  getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, serverTimestamp
+  getFirestore, collection, onSnapshot, updateDoc, deleteDoc, doc, setDoc,
+  serverTimestamp, writeBatch, increment
 } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
 /* ─────────────────────────────────────────────────────────
@@ -484,30 +597,62 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let categories = []; // [{ id, name }]
-let categoriesSeeded = false;
+/* Estrutura no Firestore:
+   categories/{id} = MODELO  → name, description, price, promoPrice, image, featured, order, active
+   products/{id}   = SABOR   → category (id do modelo), name, price, promoPrice, stock, active
+   Cada sabor continua sendo um documento próprio porque o site desconta o
+   estoque dele sozinho quando o cliente envia o pedido. */
+const DEFAULT_CREDIT_FEE = 3.42;
+const NO_MODEL = 'sem-modelo';
 
-function catName(id) {
-  const c = categories.find(c => c.id === id);
-  return c ? c.name : id;
-}
+const $ = id => document.getElementById(id);
+const fmt = n => 'R$ ' + Number(n).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+let categories = []; // modelos
+let products = [];   // sabores
+let categoriesLoaded = false;
+let productsLoaded = false;
+const expanded = new Set();
+let editingImageData = null;
+let listeners = [];
 
 function slugify(str) {
   return str
-    .normalize('NFD').replace(/\p{Diacritic}/gu, '')
+    .normalize('NFKD').replace(/[̀-ͯ]/g, '')
     .toLowerCase().trim()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-+|-+$)/g, '')
-    .slice(0, 40) || 'categoria';
+    .slice(0, 40) || 'modelo';
 }
 
-const $ = id => document.getElementById(id);
-const $$ = sel => document.querySelectorAll(sel);
-const fmt = n => 'R$ ' + Number(n).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+function normalize(str) {
+  return String(str || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+}
 
-let products = [];
-let editingImageData = null; // base64 pendente pro produto sendo editado/criado
-let unsubscribe = null;
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+function parseMoney(raw) {
+  const s = String(raw).trim().replace(',', '.');
+  if (!s) return null;
+  const n = parseFloat(s);
+  return isNaN(n) ? NaN : Math.round(n * 100) / 100;
+}
+
+function parseFlavorLines(text) {
+  const seen = new Set();
+  return text.split('\n')
+    .map(l => l.replace(/^[\s\-•*·]+/, '').trim())
+    .filter(l => {
+      const k = normalize(l);
+      if (!k || seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+}
 
 /* ─────────────────────────────────────────────────────────
    TOAST
@@ -527,16 +672,13 @@ function showToast(msg, isError = false) {
 ───────────────────────────────────────────────────────── */
 $('login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const email = $('login-email').value.trim();
-  const pass = $('login-pass').value;
   const btn = $('login-submit');
   const errEl = $('login-error');
   errEl.classList.remove('show');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Entrando…';
-
   try {
-    await signInWithEmailAndPassword(auth, email, pass);
+    await signInWithEmailAndPassword(auth, $('login-email').value.trim(), $('login-pass').value);
   } catch (err) {
     errEl.textContent = 'E-mail ou senha incorretos.';
     errEl.classList.add('show');
@@ -552,21 +694,44 @@ onAuthStateChanged(auth, (user) => {
     $('login-screen').classList.add('hidden');
     $('dashboard').classList.remove('hidden');
     $('header-user').textContent = user.email;
-    startCategoriesListener();
-    startProductsListener();
-    startStoreSettingsListener();
+    startListeners();
   } else {
     $('dashboard').classList.add('hidden');
     $('login-screen').classList.remove('hidden');
     $('login-submit').disabled = false;
     $('login-submit').innerHTML = '<i class="ph-sign-in-bold"></i> Entrar';
-    if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    listeners.forEach(unsub => unsub());
+    listeners = [];
   }
 });
 
-/* ─────────────────────────────────────────────────────────
-   LISTA DE PRODUTOS (tempo real)
-───────────────────────────────────────────────────────── */
+function startListeners() {
+  listeners.forEach(unsub => unsub());
+  listeners = [
+    onSnapshot(doc(db, 'settings', 'store'), (snap) => {
+      const data = snap.exists() ? snap.data() : {};
+      storeMode = data.mode || 'auto';
+      renderStoreStatus();
+      if (document.activeElement !== $('fee-rate')) {
+        const rate = Number(data.creditFeeRate);
+        $('fee-rate').value = Number.isFinite(rate) && data.creditFeeRate != null ? rate : DEFAULT_CREDIT_FEE;
+      }
+    }),
+    onSnapshot(collection(db, 'categories'), (snap) => {
+      categories = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      categoriesLoaded = true;
+      render();
+    }, (err) => showToast('Erro ao carregar modelos: ' + err.message, true)),
+    onSnapshot(collection(db, 'products'), (snap) => {
+      products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      productsLoaded = true;
+      render();
+    }, (err) => {
+      $('models-list').innerHTML = `<div class="empty-state"><i class="ph-warning-bold"></i>Não foi possível carregar os produtos.<br><span style="font-size:12px">${escapeHtml(err.message)}</span></div>`;
+    }),
+  ];
+}
+
 /* ─────────────────────────────────────────────────────────
    STATUS DA LOJA — automático + override manual
    Seg–Qui 9h30–22h30 · Sex–Sáb 9h30–00h · Dom 12h–22h
@@ -597,13 +762,6 @@ function isAutoOpenNow() {
 
 let storeMode = 'auto';
 
-function startStoreSettingsListener() {
-  onSnapshot(doc(db, 'settings', 'store'), (snap) => {
-    storeMode = (snap.exists() && snap.data().mode) ? snap.data().mode : 'auto';
-    renderStoreStatus();
-  });
-}
-
 function renderStoreStatus() {
   const today = new Date().getDay();
   $('store-auto-info').textContent = `Horário automático hoje (${WEEKDAY_NAMES_FULL[today]}): ${fmtHM(BUSINESS_HOURS[today][0])} às ${fmtHM(BUSINESS_HOURS[today][1])}`;
@@ -615,7 +773,7 @@ function renderStoreStatus() {
   pill.innerHTML = `<i class="${isOpen ? 'ph-check-circle-bold' : 'ph-moon-bold'}"></i> ${isOpen ? 'Aberta' : 'Fechada'}${modeNote}`;
 
   const toggleBtn = $('store-toggle-btn');
-  toggleBtn.className = 'btn btn-full ' + (isOpen ? 'btn-close-store' : 'btn-primary');
+  toggleBtn.className = 'btn btn-full ' + (isOpen ? 'btn-close-store btn-primary' : 'btn-primary');
   toggleBtn.innerHTML = isOpen
     ? '<i class="ph-storefront-bold"></i> Fechar loja agora'
     : '<i class="ph-storefront-bold"></i> Abrir loja agora';
@@ -639,235 +797,261 @@ $('store-auto-btn').addEventListener('click', () => setStoreMode('auto'));
 setInterval(renderStoreStatus, 60000);
 
 /* ─────────────────────────────────────────────────────────
-   CATEGORIAS
+   TAXA DO CRÉDITO
 ───────────────────────────────────────────────────────── */
-const DEFAULT_CATEGORIES = [
-  { id: 'descartaveis', name: 'Descartáveis' },
-  { id: 'nao-descartaveis', name: 'Não descartáveis' },
-];
-
-function startCategoriesListener() {
-  onSnapshot(collection(db, 'categories'), async (snap) => {
-    if (snap.empty && !categoriesSeeded) {
-      categoriesSeeded = true;
-      for (const c of DEFAULT_CATEGORIES) {
-        await setDoc(doc(db, 'categories', c.id), { name: c.name, createdAt: serverTimestamp() });
-      }
-      return; // o próprio seed vai disparar esse listener de novo com os dados
-    }
-    categories = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    renderCategories();
-    updateCategorySelect();
-    renderProductsList();
-  });
-}
-
-function renderCategories() {
-  const holder = $('cat-chip-row');
-  if (categories.length === 0) {
-    holder.innerHTML = `<p class="empty-cats">Nenhuma categoria ainda.</p>`;
+$('fee-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const rate = parseMoney($('fee-rate').value);
+  if (rate === null || isNaN(rate) || rate < 0 || rate > 30) {
+    showToast('Informe uma taxa entre 0 e 30%.', true);
     return;
   }
-  holder.innerHTML = categories.map(c => {
-    const count = products.filter(p => p.category === c.id).length;
-    return `
-      <div class="cat-chip">
-        <span>${escapeHtml(c.name)}</span>
-        <span class="cat-chip-count">(${count})</span>
-        <button type="button" class="cat-chip-del" data-cat-del="${c.id}" aria-label="Remover categoria" title="Remover categoria">
-          <i class="ph-x-bold"></i>
-        </button>
-      </div>`;
-  }).join('');
-
-  holder.querySelectorAll('[data-cat-del]').forEach(btn =>
-    btn.addEventListener('click', () => deleteCategory(btn.dataset.catDel))
-  );
-}
-
-function updateCategorySelect() {
-  const select = $('p-cat');
-  const current = select.value;
-  select.innerHTML = categories.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
-  if (current && categories.some(c => c.id === current)) select.value = current;
-}
-
-$('cat-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const input = $('cat-name');
-  const name = input.value.trim();
-  if (!name) return;
-  let id = slugify(name);
-  if (categories.some(c => c.id === id)) {
-    let n = 2;
-    while (categories.some(c => c.id === `${id}-${n}`)) n++;
-    id = `${id}-${n}`;
-  }
   try {
-    await setDoc(doc(db, 'categories', id), { name, createdAt: serverTimestamp() });
-    input.value = '';
-    showToast('Categoria criada.');
+    await setDoc(doc(db, 'settings', 'store'), { creditFeeRate: rate, updatedAt: serverTimestamp() }, { merge: true });
+    $('fee-rate').blur();
+    showToast(rate > 0 ? `Taxa do crédito salva: ${String(rate).replace('.', ',')}%` : 'Crédito sem acréscimo.');
   } catch (err) {
-    showToast('Erro ao criar categoria: ' + err.message, true);
+    showToast('Erro ao salvar a taxa: ' + err.message, true);
   }
 });
 
-async function deleteCategory(id) {
-  const inUse = products.filter(p => p.category === id).length;
-  if (inUse > 0) {
-    showToast(`Essa categoria tem ${inUse} produto(s). Mude a categoria deles antes de remover.`, true);
-    return;
-  }
-  const cat = categories.find(c => c.id === id);
-  if (!confirm(`Remover a categoria "${cat?.name || id}"?`)) return;
-  try {
-    await deleteDoc(doc(db, 'categories', id));
-    showToast('Categoria removida.');
-  } catch (err) {
-    showToast('Erro ao remover: ' + err.message, true);
-  }
+/* ─────────────────────────────────────────────────────────
+   MODELOS + SABORES — montagem da lista
+───────────────────────────────────────────────────────── */
+const flavorsOf = id => products.filter(p => (p.category || NO_MODEL) === id);
+const catById = id => categories.find(c => c.id === id);
+
+/* Preço "do modelo": o salvo no modelo ou, nos modelos antigos que não
+   tinham esse campo, o preço mais comum entre os sabores. */
+function modelPrice(cat, flavors) {
+  if (cat && cat.price != null && cat.price !== '') return Number(cat.price);
+  const counts = {};
+  flavors.forEach(f => { const p = Number(f.price) || 0; counts[p] = (counts[p] || 0) + 1; });
+  const best = Object.entries(counts).sort((a, b) => b[1] - a[1])[0];
+  return best ? Number(best[0]) : null;
 }
 
-function startProductsListener() {
-  unsubscribe = onSnapshot(collection(db, 'products'), (snap) => {
-    products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    products.sort((a, b) => (a.category || '').localeCompare(b.category || '') || (a.name || '').localeCompare(b.name || ''));
-    renderStats();
-    renderProductsList();
-  }, (err) => {
-    $('products-list').innerHTML = `<div class="empty-state"><i class="ph-warning-bold"></i>Não foi possível carregar os produtos.<br><span style="font-size:12px">${err.message}</span></div>`;
+function buildModels() {
+  const list = categories.map(c => ({ ...c, flavors: flavorsOf(c.id) }));
+  const orphans = products.filter(p => !catById(p.category || NO_MODEL));
+  if (orphans.length) list.push({ id: NO_MODEL, name: 'Sem modelo', virtual: true, flavors: orphans });
+  list.forEach(m => m.flavors.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pt-BR')));
+  return list.sort((a, b) => {
+    const oa = a.order != null && a.order !== '' ? Number(a.order) : 9999;
+    const ob = b.order != null && b.order !== '' ? Number(b.order) : 9999;
+    return oa - ob || (a.name || '').localeCompare(b.name || '', 'pt-BR');
   });
+}
+
+function render() {
+  if (!categoriesLoaded || !productsLoaded) return;
+  renderStats();
+  renderModels();
 }
 
 function renderStats() {
-  const total = products.length;
-  const outOfStock = products.filter(p => Number(p.stock) === 0).length;
-  const onPromo = products.filter(p => p.promoPrice).length;
-  const paused = products.filter(p => p.active === false).length;
-  const noModel = products.filter(p => !p.model).length;
+  const real = categories.length;
+  const out = products.filter(p => p.active !== false && (Number(p.stock) || 0) <= 0).length;
+  const noPhoto = categories.filter(c => !c.image && !flavorsOf(c.id).some(f => f.image)).length;
   $('stats-row').innerHTML = `
-    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Produtos no catálogo</div></div>
-    <div class="stat-card"><div class="stat-num">${outOfStock}</div><div class="stat-label">Esgotados</div></div>
-    <div class="stat-card"><div class="stat-num">${onPromo}</div><div class="stat-label">Em promoção</div></div>
-    <div class="stat-card"><div class="stat-num">${paused}</div><div class="stat-label">Pausados</div></div>
-    <div class="stat-card"><div class="stat-num" style="${noModel > 0 ? 'color:#B87914' : ''}">${noModel}</div><div class="stat-label">Sem modelo cadastrado</div></div>
-  `;
+    <div class="stat-card"><div class="stat-num">${real}</div><div class="stat-label">Modelos</div></div>
+    <div class="stat-card"><div class="stat-num">${products.length}</div><div class="stat-label">Sabores</div></div>
+    <div class="stat-card"><div class="stat-num ${out ? 'warn' : ''}">${out}</div><div class="stat-label">Esgotados</div></div>
+    <div class="stat-card"><div class="stat-num ${noPhoto ? 'warn' : ''}">${noPhoto}</div><div class="stat-label">Sem foto</div></div>`;
 }
 
-const SEED_PRODUCTS = [
-  { name: 'Ignite 8.000 Puffs — Grape Ice', description: 'Uva com toque de gelo. Até 8.000 puffs, nicotina 50mg', category: 'descartaveis', price: 69.90, promoPrice: null, stock: 10, image: './produtos/ignite-grape-ice-8k.png' },
-  { name: 'Ignite 8.000 Puffs — Green Apple', description: 'Maçã verde refrescante. Até 8.000 puffs, nicotina 50mg', category: 'descartaveis', price: 69.90, promoPrice: null, stock: 10, image: './produtos/ignite-green-apple.png' },
-  { name: 'Ignite 8.000 Puffs — Strawberry Kiwi', description: 'Morango com kiwi tropical. Até 8.000 puffs, nicotina 50mg', category: 'descartaveis', price: 69.90, promoPrice: null, stock: 10, image: './produtos/ignite-strawberry-kiwi-8k.png' },
-  { name: 'Ignite 15.000 Puffs — Grape Ice', description: 'Uva com gelo. Autonomia superior com até 15.000 puffs, 50mg', category: 'descartaveis', price: 99.90, promoPrice: null, stock: 10, image: null },
-  { name: 'Ignite 15.000 Puffs — Green Apple', description: 'Maçã verde gelada. Até 15.000 puffs, alto desempenho, 50mg', category: 'descartaveis', price: 99.90, promoPrice: null, stock: 10, image: null },
-  { name: 'Ignite 15.000 Puffs — Strawberry Kiwi', description: 'Morango e kiwi. Versão premium com até 15.000 puffs, 50mg', category: 'descartaveis', price: 99.90, promoPrice: null, stock: 10, image: null },
-  { name: 'Elfbar BC5000 — Blue Razz Ice', description: 'Framboesa azul gelada. 5.000 puffs, malha dupla, design slim', category: 'descartaveis', price: 64.90, promoPrice: null, stock: 10, image: null },
-  { name: 'Elfbar BC10000 — Peach Mango', description: 'Pêssego e manga. 10.000 puffs, display de bateria integrado', category: 'descartaveis', price: 89.90, promoPrice: null, stock: 10, image: null },
-];
+function renderModels() {
+  const holder = $('models-list');
+  const q = normalize($('search').value);
+  let models = buildModels();
 
-async function seedProducts() {
-  const btn = $('seed-btn');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Importando…'; }
-  try {
-    for (const p of SEED_PRODUCTS) {
-      await addDoc(collection(db, 'products'), { ...p, createdAt: serverTimestamp(), updatedAt: serverTimestamp() });
-    }
-    showToast('Catálogo importado.');
-  } catch (err) {
-    showToast('Erro ao importar: ' + err.message, true);
+  if (q) {
+    models = models.filter(m => normalize(m.name).includes(q) || m.flavors.some(f => normalize(f.name).includes(q)));
   }
-}
 
-function renderProductsList() {
-  const holder = $('products-list');
-  if (products.length === 0) {
-    holder.innerHTML = `<div class="empty-state">
-      <i class="ph-package-bold"></i>Nenhum produto ainda.<br>Clique em "Adicionar produto" pra começar.
-      <div style="margin-top:18px">
-        <button class="btn btn-outline btn-sm" id="seed-btn"><i class="ph-download-simple-bold"></i> Importar catálogo atual do site (8 produtos)</button>
-      </div>
-    </div>`;
-    $('seed-btn').addEventListener('click', seedProducts);
+  if (!models.length) {
+    holder.innerHTML = q
+      ? `<div class="empty-state"><i class="ph-magnifying-glass-bold"></i>Nada encontrado pra essa busca.</div>`
+      : `<div class="empty-state"><i class="ph-package-bold"></i>Nenhum modelo ainda.<br>Toque em "Novo modelo" pra começar.</div>`;
     return;
   }
 
-  const groups = {};
-  products.forEach(p => {
-    const cat = p.category || 'descartaveis';
-    (groups[cat] = groups[cat] || []).push(p);
-  });
-
-  holder.innerHTML = Object.keys(groups).map(cat => `
-    <div class="cat-group">
-      <div class="cat-group-title">${catName(cat)} (${groups[cat].length})</div>
-      ${groups[cat].map(p => productRowHtml(p)).join('')}
-    </div>
-  `).join('');
-
-  holder.querySelectorAll('[data-edit]').forEach(btn =>
-    btn.addEventListener('click', () => openModal(btn.dataset.edit))
-  );
-  holder.querySelectorAll('[data-delete]').forEach(btn =>
-    btn.addEventListener('click', () => deleteProduct(btn.dataset.delete))
-  );
-  holder.querySelectorAll('[data-toggle]').forEach(btn =>
-    btn.addEventListener('click', () => toggleActive(btn.dataset.toggle, btn.dataset.active === 'true'))
-  );
+  holder.innerHTML = models.map(m => modelCardHtml(m, q)).join('');
 }
 
-async function toggleActive(id, wasActive) {
-  try {
-    await updateDoc(doc(db, 'products', id), { active: !wasActive, updatedAt: serverTimestamp() });
-    showToast(wasActive ? 'Produto pausado — some do site até você reativar.' : 'Produto reativado — já aparece no site.');
-  } catch (err) {
-    showToast('Erro ao atualizar: ' + err.message, true);
-  }
-}
+function modelCardHtml(m, q) {
+  const isOpen = expanded.has(m.id) || (!!q && m.flavors.some(f => normalize(f.name).includes(q)));
+  const paused = m.active === false;
+  const active = m.flavors.filter(f => f.active !== false);
+  const outCount = active.filter(f => (Number(f.stock) || 0) <= 0).length;
+  const totalStock = active.reduce((s, f) => s + Math.max(0, Number(f.stock) || 0), 0);
+  const price = modelPrice(m, m.flavors);
+  const img = m.image || (m.flavors.find(f => f.image) || {}).image;
+  const thumb = img ? `<img src="${img}" alt="">` : `<i class="ph-package-bold"></i>`;
+  const promo = m.promoPrice ? Number(m.promoPrice) : null;
 
-function productRowHtml(p) {
-  const stock = Number(p.stock) || 0;
-  const isActive = p.active !== false;
-  const stockClass = stock === 0 ? 'zero' : (stock <= 2 ? 'low' : '');
-  const stockLabel = stock === 0 ? 'Esgotado' : `${stock} em estoque`;
-  const priceHtml = p.promoPrice
-    ? `<span class="pr-price-old">${fmt(p.price)}</span><span class="pr-price">${fmt(p.promoPrice)}</span>`
-    : `<span class="pr-price">${fmt(p.price)}</span>`;
-  const thumb = p.image
-    ? `<img src="${p.image}" alt="">`
-    : `<i class="ph-package-bold"></i>`;
-  const pauseIcon = isActive ? 'ph-pause-bold' : 'ph-play-bold';
-  const pauseLabel = isActive ? 'Pausar (tirar do site)' : 'Reativar (mostrar no site)';
-  const fullName = p.model ? `${p.model} — ${p.name || ''}` : (p.name || '(sem nome)');
+  const badges = [
+    m.featured ? '<span class="badge badge-star">Destaque</span>' : '',
+    paused ? '<span class="badge badge-paused">Pausado</span>' : '',
+    !m.virtual && !img ? '<span class="badge badge-warn">Sem foto</span>' : '',
+  ].join('');
+
+  const meta = [
+    price != null ? `<span class="price">${promo ? fmt(promo) : fmt(price)}</span>` : '',
+    `<span>${m.flavors.length} ${m.flavors.length === 1 ? 'sabor' : 'sabores'}</span>`,
+    `<span>${totalStock} em estoque</span>`,
+    outCount ? `<span class="out">${outCount} esgotado${outCount > 1 ? 's' : ''}</span>` : '',
+  ].join('');
 
   return `
-    <div class="product-row${isActive ? '' : ' is-paused'}">
-      <div class="pr-thumb">${thumb}</div>
-      <div class="pr-body">
-        <div class="pr-name">${escapeHtml(fullName)} ${!isActive ? '<span class="pr-paused-badge">Pausado</span>' : ''} ${!p.model ? '<span class="pr-warn-badge" title="Edite o produto e preencha o campo Modelo">Sem modelo</span>' : ''}</div>
-        <div class="pr-meta">
-          ${priceHtml}
-          <span class="pr-stock ${stockClass}">${stockLabel}</span>
+    <div class="model-card${isOpen ? ' is-open' : ''}${paused ? ' is-paused' : ''}" data-model="${m.id}">
+      <button type="button" class="mc-head" data-expand="${m.id}" aria-expanded="${isOpen}">
+        <div class="mc-thumb">${thumb}</div>
+        <div class="mc-body">
+          <div class="mc-name">${escapeHtml(m.name)}${badges}</div>
+          <div class="mc-meta">${meta}</div>
         </div>
-      </div>
-      <div class="pr-actions">
-        <button class="pr-icon-btn" data-toggle="${p.id}" data-active="${isActive}" aria-label="${pauseLabel}" title="${pauseLabel}"><i class="${pauseIcon}"></i></button>
-        <button class="pr-icon-btn" data-edit="${p.id}" aria-label="Editar" title="Editar"><i class="ph-pencil-simple-bold"></i></button>
-        <button class="pr-icon-btn danger" data-delete="${p.id}" aria-label="Remover" title="Remover"><i class="ph-trash-bold"></i></button>
-      </div>
+        <i class="ph-caret-down-bold mc-caret"></i>
+      </button>
+      ${isOpen ? panelHtml(m, paused) : ''}
     </div>`;
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+function panelHtml(m, paused) {
+  const actions = m.virtual
+    ? `<p class="field-hint" style="grid-column:1/-1;margin:0">Sabores que perderam o modelo. Toque em cada um pra escolher o modelo certo.</p>`
+    : `
+      <button type="button" class="btn btn-primary btn-sm" data-act="add-flavors" data-id="${m.id}"><i class="ph-plus-bold"></i> Sabores</button>
+      <button type="button" class="btn btn-outline btn-sm" data-act="edit-model" data-id="${m.id}"><i class="ph-pencil-simple-bold"></i> Editar</button>
+      <button type="button" class="btn btn-outline btn-sm" data-act="toggle-model" data-id="${m.id}"><i class="${paused ? 'ph-play-bold' : 'ph-pause-bold'}"></i> ${paused ? 'Reativar' : 'Pausar'}</button>
+      <button type="button" class="btn btn-outline btn-sm btn-danger" data-act="delete-model" data-id="${m.id}"><i class="ph-trash-bold"></i> Excluir</button>`;
+
+  const rows = m.flavors.length
+    ? m.flavors.map(f => flavorRowHtml(f, m)).join('')
+    : `<p class="fl-empty">Nenhum sabor ainda. Toque em "Sabores" pra adicionar.</p>`;
+
+  return `<div class="mc-panel"><div class="mc-actions">${actions}</div><ul class="fl-list">${rows}</ul></div>`;
+}
+
+function flavorRowHtml(f, m) {
+  const stock = Math.max(0, Number(f.stock) || 0);
+  const paused = f.active === false;
+  const base = modelPrice(m, m.flavors);
+  const price = Number(f.price) || 0;
+  const promo = f.promoPrice ? Number(f.promoPrice) : null;
+  const subParts = [];
+  if (promo) subParts.push(`${fmt(promo)} <span class="old">${fmt(price)}</span>`);
+  else if (base == null || price !== base) subParts.push(fmt(price));
+  if (paused) subParts.push('Pausado');
+  if (!stock && !paused) subParts.push('<span style="color:var(--red);font-weight:600">Esgotado</span>');
+  const stockCls = stock === 0 ? 'zero' : (stock <= 2 ? 'low' : '');
+
+  return `
+    <li class="fl-row${paused ? ' is-paused' : ''}">
+      <button type="button" class="fl-name-btn" data-act="edit-flavor" data-id="${f.id}">
+        <span class="fl-name">${escapeHtml(f.name || '(sem nome)')}</span>
+        ${subParts.length ? `<span class="fl-sub">${subParts.join(' · ')}</span>` : ''}
+      </button>
+      <div class="stepper">
+        <button type="button" data-act="stock" data-delta="-1" data-id="${f.id}" aria-label="Diminuir estoque" ${stock <= 0 ? 'disabled' : ''}><i class="ph-minus-bold"></i></button>
+        <button type="button" class="stock-num ${stockCls}" data-act="stock-set" data-id="${f.id}" aria-label="Definir estoque">${stock}</button>
+        <button type="button" data-act="stock" data-delta="1" data-id="${f.id}" aria-label="Aumentar estoque"><i class="ph-plus-bold"></i></button>
+      </div>
+    </li>`;
+}
+
+$('search').addEventListener('input', renderModels);
+
+/* Um único listener pra lista inteira (ela é redesenhada a cada mudança) */
+$('models-list').addEventListener('click', (e) => {
+  const head = e.target.closest('[data-expand]');
+  if (head) {
+    const id = head.dataset.expand;
+    if (expanded.has(id)) expanded.delete(id); else expanded.add(id);
+    renderModels();
+    return;
+  }
+  const btn = e.target.closest('[data-act]');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  switch (btn.dataset.act) {
+    case 'add-flavors':  openFlavorsModal(id); break;
+    case 'edit-model':   openModelModal(id); break;
+    case 'toggle-model': toggleModel(id); break;
+    case 'delete-model': deleteModel(id); break;
+    case 'edit-flavor':  openFlavorModal(id); break;
+    case 'stock':        changeStock(id, Number(btn.dataset.delta)); break;
+    case 'stock-set':    promptStock(id); break;
+  }
+});
+
+/* ─────────────────────────────────────────────────────────
+   ESTOQUE — increment() pra não brigar com a baixa automática
+   que o site faz quando um cliente envia pedido
+───────────────────────────────────────────────────────── */
+async function changeStock(id, delta) {
+  const f = products.find(p => p.id === id);
+  if (!f) return;
+  if (delta < 0 && (Number(f.stock) || 0) <= 0) return;
+  try {
+    await updateDoc(doc(db, 'products', id), { stock: increment(delta), updatedAt: serverTimestamp() });
+  } catch (err) {
+    showToast('Erro ao mudar estoque: ' + err.message, true);
+  }
+}
+
+async function promptStock(id) {
+  const f = products.find(p => p.id === id);
+  if (!f) return;
+  const raw = prompt(`Estoque de ${f.name}:`, Math.max(0, Number(f.stock) || 0));
+  if (raw === null) return;
+  const n = parseInt(raw, 10);
+  if (isNaN(n) || n < 0) { showToast('Digite um número igual ou maior que 0.', true); return; }
+  try {
+    await updateDoc(doc(db, 'products', id), { stock: n, updatedAt: serverTimestamp() });
+  } catch (err) {
+    showToast('Erro ao salvar estoque: ' + err.message, true);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────
-   COMPRESSÃO DE IMAGEM (sem Firebase Storage — vira base64)
+   MODAIS — abrir / fechar
 ───────────────────────────────────────────────────────── */
-function compressImage(file, maxWidth = 700, quality = 0.75) {
+function openModal(id) {
+  $(id).classList.remove('hidden');
+  document.body.classList.add('modal-open');
+}
+
+function closeModals() {
+  document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
+  document.body.classList.remove('modal-open');
+}
+
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal || e.target.closest('[data-close-modal]')) closeModals();
+  });
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModals(); });
+
+function showError(elId, msg) {
+  const el = $(elId);
+  el.textContent = msg;
+  el.classList.add('show');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function setBusy(btnId, busy, label) {
+  const btn = $(btnId);
+  btn.disabled = busy;
+  if (busy) { btn.dataset.label = btn.innerHTML; btn.innerHTML = `<span class="spinner"></span> ${label}`; }
+  else if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
+}
+
+/* ─────────────────────────────────────────────────────────
+   FOTO DO MODELO (sem Firebase Storage — vira base64)
+───────────────────────────────────────────────────────── */
+function compressImage(file, maxWidth = 600, quality = 0.75) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -878,6 +1062,8 @@ function compressImage(file, maxWidth = 700, quality = 0.75) {
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
         const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         resolve(canvas.toDataURL('image/jpeg', quality));
       };
@@ -889,147 +1075,346 @@ function compressImage(file, maxWidth = 700, quality = 0.75) {
   });
 }
 
-$('p-image').addEventListener('change', async (e) => {
+function setPreview(src) {
+  editingImageData = src || null;
+  $('image-preview').src = src || '';
+  $('image-remove').classList.toggle('hidden', !src);
+}
+
+$('m-image').addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
   $('image-status').textContent = 'Comprimindo imagem…';
   try {
     const dataUrl = await compressImage(file);
     const sizeKB = Math.round(dataUrl.length * 0.75 / 1024);
-    if (sizeKB > 700) {
+    if (sizeKB > 600) {
       $('image-status').textContent = 'Essa imagem ainda ficou grande demais. Tente outra foto.';
       return;
     }
-    editingImageData = dataUrl;
-    $('image-preview').src = dataUrl;
+    setPreview(dataUrl);
     $('image-status').textContent = `Imagem pronta (~${sizeKB}KB).`;
   } catch (err) {
     $('image-status').textContent = err.message;
   }
 });
-
-/* ─────────────────────────────────────────────────────────
-   MODAL — ABRIR / FECHAR
-───────────────────────────────────────────────────────── */
-function openModal(productId) {
-  $('form-error').classList.remove('show');
-  $('product-form').reset();
-  editingImageData = null;
-  $('image-preview').src = '';
-  $('image-status').textContent = '';
-
-  if (productId) {
-    const p = products.find(x => x.id === productId);
-    if (!p) return;
-    $('modal-title').textContent = 'Editar produto';
-    $('p-id').value = p.id;
-    $('p-model').value = p.model || '';
-    $('p-name').value = p.name || '';
-    $('p-desc').value = p.description || '';
-    $('p-cat').value = p.category || 'descartaveis';
-    $('p-price').value = p.price ?? '';
-    $('p-promo').value = p.promoPrice ?? '';
-    $('p-stock').value = p.stock ?? 0;
-    if (p.image) {
-      $('image-preview').src = p.image;
-      editingImageData = p.image;
-    }
-  } else {
-    $('modal-title').textContent = 'Adicionar produto';
-    $('p-id').value = '';
-  }
-
-  $('product-modal').classList.remove('hidden');
-}
-
-function closeModal() {
-  $('product-modal').classList.add('hidden');
-}
-
-$('add-product-btn').addEventListener('click', () => openModal(null));
-$('modal-close').addEventListener('click', closeModal);
-$('modal-cancel').addEventListener('click', closeModal);
-$('product-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'product-modal') closeModal();
+$('image-remove').addEventListener('click', () => {
+  setPreview(null);
+  $('m-image').value = '';
+  $('image-status').textContent = 'A foto vai ser removida quando você salvar.';
 });
 
+function updateCountHint(textareaId, hintId) {
+  const n = parseFlavorLines($(textareaId).value).length;
+  $(hintId).textContent = n ? `${n} ${n === 1 ? 'sabor' : 'sabores'}` : '';
+}
+$('m-flavors').addEventListener('input', () => updateCountHint('m-flavors', 'm-flavors-count'));
+$('af-names').addEventListener('input', () => updateCountHint('af-names', 'af-count'));
+
 /* ─────────────────────────────────────────────────────────
-   SALVAR (criar ou editar)
+   MODELO — criar / editar
 ───────────────────────────────────────────────────────── */
-$('product-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const errEl = $('form-error');
-  errEl.classList.remove('show');
+function openModelModal(id) {
+  $('model-form').reset();
+  $('model-error').classList.remove('show');
+  $('image-status').textContent = '';
+  $('m-flavors-count').textContent = '';
+  $('m-image').value = '';
 
-  const name = $('p-name').value.trim();
-  const price = parseFloat($('p-price').value);
-  const promoRaw = $('p-promo').value.trim();
-  const promoPrice = promoRaw ? parseFloat(promoRaw) : null;
-  const stock = parseInt($('p-stock').value, 10);
+  const cat = id ? catById(id) : null;
+  $('m-id').value = cat ? cat.id : '';
+  $('model-modal-title').textContent = cat ? 'Editar modelo' : 'Novo modelo';
+  $('m-new-flavors').classList.toggle('hidden', !!cat);
+  $('m-apply-row').classList.add('hidden');
+  $('m-apply').checked = true;
 
-  if (!name) { return showFormError('Informe o nome do produto.'); }
-  if (isNaN(price) || price <= 0) { return showFormError('Informe um preço válido.'); }
-  if (promoPrice !== null && (isNaN(promoPrice) || promoPrice <= 0 || promoPrice >= price)) {
-    return showFormError('O preço promocional precisa ser menor que o preço normal.');
+  if (cat) {
+    const flavors = flavorsOf(cat.id);
+    const price = modelPrice(cat, flavors);
+    $('m-name').value = cat.name || '';
+    $('m-desc').value = cat.description || '';
+    $('m-price').value = price ?? '';
+    $('m-price').dataset.original = price ?? '';
+    $('m-promo').value = cat.promoPrice ?? '';
+    $('m-promo').dataset.original = cat.promoPrice ?? '';
+    $('m-featured').checked = cat.featured === true;
+    $('m-order').value = cat.order ?? '';
+    setPreview(cat.image || null);
+  } else {
+    $('m-price').dataset.original = '';
+    $('m-promo').dataset.original = '';
+    $('m-stock').value = 1;
+    setPreview(null);
   }
-  if (isNaN(stock) || stock < 0) { return showFormError('Informe o estoque (0 ou mais).'); }
+  openModal('model-modal');
+  if (!cat) setTimeout(() => $('m-name').focus(), 50);
+}
 
-  const data = {
-    model: $('p-model').value.trim(),
+/* Mostra "aplicar em todos" só quando o preço mudou num modelo existente */
+['m-price', 'm-promo'].forEach(id => $(id).addEventListener('input', () => {
+  if (!$('m-id').value) return;
+  const changed = $('m-price').value !== String($('m-price').dataset.original) ||
+                  $('m-promo').value !== String($('m-promo').dataset.original);
+  $('m-apply-row').classList.toggle('hidden', !changed);
+}));
+
+$('add-model-btn').addEventListener('click', () => openModelModal(null));
+
+$('model-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('model-error').classList.remove('show');
+
+  const id = $('m-id').value;
+  const name = $('m-name').value.trim();
+  const price = parseMoney($('m-price').value);
+  const promoPrice = parseMoney($('m-promo').value);
+  const orderRaw = $('m-order').value.trim();
+  const order = orderRaw ? parseInt(orderRaw, 10) : null;
+
+  if (!name) return showError('model-error', 'Informe o nome do modelo.');
+  if (price === null || isNaN(price) || price <= 0) return showError('model-error', 'Informe um preço válido.');
+  if (promoPrice !== null && (isNaN(promoPrice) || promoPrice <= 0 || promoPrice >= price)) {
+    return showError('model-error', 'O preço promocional precisa ser menor que o preço normal.');
+  }
+  if (order !== null && (isNaN(order) || order < 1)) return showError('model-error', 'A posição precisa ser 1 ou mais.');
+
+  const modelData = {
     name,
-    description: $('p-desc').value.trim(),
-    category: $('p-cat').value,
+    description: $('m-desc').value.trim(),
     price,
-    promoPrice: promoPrice,
-    stock,
+    promoPrice,
     image: editingImageData || null,
+    featured: $('m-featured').checked,
+    order,
     updatedAt: serverTimestamp(),
   };
 
-  const id = $('p-id').value;
-  const btn = $('save-btn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Salvando…';
-
+  setBusy('model-save', true, 'Salvando…');
   try {
     if (id) {
-      await updateDoc(doc(db, 'products', id), data);
-      showToast('Produto atualizado.');
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'categories', id), modelData, { merge: true });
+      const cat = catById(id);
+      const applyPrice = !$('m-apply-row').classList.contains('hidden') && $('m-apply').checked;
+      const renamed = cat && cat.name !== name;
+      flavorsOf(id).forEach(f => {
+        const upd = {};
+        if (applyPrice) { upd.price = price; upd.promoPrice = promoPrice; }
+        if (renamed) upd.model = name;
+        if (Object.keys(upd).length) batch.update(doc(db, 'products', f.id), { ...upd, updatedAt: serverTimestamp() });
+      });
+      await batch.commit();
+      showToast(applyPrice ? 'Modelo salvo e preço aplicado nos sabores.' : 'Modelo salvo.');
     } else {
-      data.active = true;
-      data.createdAt = serverTimestamp();
-      await addDoc(collection(db, 'products'), data);
-      showToast('Produto adicionado.');
+      const flavors = parseFlavorLines($('m-flavors').value);
+      const stock = parseInt($('m-stock').value, 10);
+      if (!flavors.length) { setBusy('model-save', false); return showError('model-error', 'Escreva pelo menos 1 sabor, um por linha.'); }
+      if (isNaN(stock) || stock < 0) { setBusy('model-save', false); return showError('model-error', 'O estoque inicial precisa ser 0 ou mais.'); }
+
+      let newId = slugify(name);
+      if (catById(newId) || newId === NO_MODEL) {
+        let n = 2;
+        while (catById(`${newId}-${n}`)) n++;
+        newId = `${newId}-${n}`;
+      }
+
+      // Antes do commit: o listener redesenha a lista já com o modelo novo aberto
+      expanded.add(newId);
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'categories', newId), { ...modelData, active: true, createdAt: serverTimestamp() });
+      flavors.forEach(fname => {
+        batch.set(doc(collection(db, 'products')), {
+          category: newId, model: name, name: fname, description: '',
+          price, promoPrice, stock, image: null, active: true,
+          createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+        });
+      });
+      await batch.commit();
+      showToast(`Modelo criado com ${flavors.length} ${flavors.length === 1 ? 'sabor' : 'sabores'}.`);
     }
-    closeModal();
+    closeModals();
   } catch (err) {
-    showFormError('Erro ao salvar: ' + err.message);
+    showError('model-error', 'Erro ao salvar: ' + err.message);
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = '<i class="ph-check-bold"></i> Salvar produto';
+    setBusy('model-save', false);
   }
 });
 
-function showFormError(msg) {
-  const el = $('form-error');
-  el.textContent = msg;
-  el.classList.add('show');
+async function toggleModel(id) {
+  const cat = catById(id);
+  if (!cat) return;
+  const wasActive = cat.active !== false;
+  try {
+    await updateDoc(doc(db, 'categories', id), { active: !wasActive, updatedAt: serverTimestamp() });
+    showToast(wasActive ? 'Modelo pausado. Some do site até você reativar.' : 'Modelo reativado. Já aparece no site.');
+  } catch (err) {
+    showToast('Erro ao atualizar: ' + err.message, true);
+  }
+}
+
+async function deleteModel(id) {
+  const cat = catById(id);
+  if (!cat) return;
+  const flavors = flavorsOf(id);
+  const msg = flavors.length
+    ? `Excluir "${cat.name}" e os ${flavors.length} sabores dele? Não dá pra desfazer.`
+    : `Excluir "${cat.name}"? Não dá pra desfazer.`;
+  if (!confirm(msg)) return;
+  try {
+    const batch = writeBatch(db);
+    flavors.forEach(f => batch.delete(doc(db, 'products', f.id)));
+    batch.delete(doc(db, 'categories', id));
+    await batch.commit();
+    expanded.delete(id);
+    showToast('Modelo excluído.');
+  } catch (err) {
+    showToast('Erro ao excluir: ' + err.message, true);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────
-   REMOVER
+   ADICIONAR SABORES EM LOTE
 ───────────────────────────────────────────────────────── */
-async function deleteProduct(id) {
-  const p = products.find(x => x.id === id);
-  if (!p) return;
-  if (!confirm(`Remover "${p.name}" do catálogo? Essa ação não pode ser desfeita.`)) return;
-  try {
-    await deleteDoc(doc(db, 'products', id));
-    showToast('Produto removido.');
-  } catch (err) {
-    showToast('Erro ao remover: ' + err.message, true);
-  }
+function openFlavorsModal(modelId) {
+  const cat = catById(modelId);
+  if (!cat) return;
+  $('flavors-form').reset();
+  $('flavors-error').classList.remove('show');
+  $('af-count').textContent = '';
+  $('af-model').value = modelId;
+  $('af-model-name').textContent = `Modelo: ${cat.name}`;
+  $('af-stock').value = 1;
+  $('af-price').value = modelPrice(cat, flavorsOf(modelId)) ?? '';
+  openModal('flavors-modal');
+  setTimeout(() => $('af-names').focus(), 50);
 }
+
+$('flavors-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('flavors-error').classList.remove('show');
+  const modelId = $('af-model').value;
+  const cat = catById(modelId);
+  const names = parseFlavorLines($('af-names').value);
+  const stock = parseInt($('af-stock').value, 10);
+  const price = parseMoney($('af-price').value);
+
+  if (!names.length) return showError('flavors-error', 'Escreva pelo menos 1 sabor, um por linha.');
+  if (isNaN(stock) || stock < 0) return showError('flavors-error', 'O estoque precisa ser 0 ou mais.');
+  if (price === null || isNaN(price) || price <= 0) return showError('flavors-error', 'Informe um preço válido.');
+
+  const existing = new Set(flavorsOf(modelId).map(f => normalize(f.name)));
+  const fresh = names.filter(n => !existing.has(normalize(n)));
+  if (!fresh.length) return showError('flavors-error', 'Todos esses sabores já existem nesse modelo.');
+
+  const promo = cat && cat.promoPrice && Number(cat.promoPrice) < price ? Number(cat.promoPrice) : null;
+
+  setBusy('flavors-save', true, 'Adicionando…');
+  expanded.add(modelId);
+  try {
+    const batch = writeBatch(db);
+    fresh.forEach(fname => {
+      batch.set(doc(collection(db, 'products')), {
+        category: modelId, model: cat ? cat.name : '', name: fname, description: '',
+        price, promoPrice: promo, stock, image: null, active: true,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+      });
+    });
+    await batch.commit();
+    const skipped = names.length - fresh.length;
+    showToast(`${fresh.length} ${fresh.length === 1 ? 'sabor adicionado' : 'sabores adicionados'}${skipped ? ` (${skipped} já existia${skipped > 1 ? 'm' : ''})` : ''}.`);
+    closeModals();
+  } catch (err) {
+    showError('flavors-error', 'Erro ao adicionar: ' + err.message);
+  } finally {
+    setBusy('flavors-save', false);
+  }
+});
+
+/* ─────────────────────────────────────────────────────────
+   EDITAR SABOR
+───────────────────────────────────────────────────────── */
+function openFlavorModal(id) {
+  const f = products.find(p => p.id === id);
+  if (!f) return;
+  $('flavor-error').classList.remove('show');
+  $('f-id').value = f.id;
+  $('f-name').value = f.name || '';
+  $('f-price').value = f.price ?? '';
+  $('f-promo').value = f.promoPrice ?? '';
+  $('f-stock').value = Math.max(0, Number(f.stock) || 0);
+
+  const sorted = [...categories].sort((a, b) => (a.name || '').localeCompare(b.name || '', 'pt-BR'));
+  const current = catById(f.category) ? f.category : '';
+  $('f-cat').innerHTML = (current ? '' : '<option value="">Escolha o modelo</option>') +
+    sorted.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+  $('f-cat').value = current;
+
+  const paused = f.active === false;
+  $('f-toggle').innerHTML = paused
+    ? '<i class="ph-play-bold"></i> Reativar sabor'
+    : '<i class="ph-pause-bold"></i> Pausar sabor';
+  openModal('flavor-modal');
+}
+
+$('flavor-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('flavor-error').classList.remove('show');
+  const id = $('f-id').value;
+  const name = $('f-name').value.trim();
+  const category = $('f-cat').value;
+  const price = parseMoney($('f-price').value);
+  const promoPrice = parseMoney($('f-promo').value);
+  const stock = parseInt($('f-stock').value, 10);
+
+  if (!name) return showError('flavor-error', 'Informe o nome do sabor.');
+  if (!category) return showError('flavor-error', 'Escolha o modelo desse sabor.');
+  if (price === null || isNaN(price) || price <= 0) return showError('flavor-error', 'Informe um preço válido.');
+  if (promoPrice !== null && (isNaN(promoPrice) || promoPrice <= 0 || promoPrice >= price)) {
+    return showError('flavor-error', 'O preço promocional precisa ser menor que o preço normal.');
+  }
+  if (isNaN(stock) || stock < 0) return showError('flavor-error', 'O estoque precisa ser 0 ou mais.');
+
+  setBusy('flavor-save', true, 'Salvando…');
+  expanded.add(category);
+  try {
+    const cat = catById(category);
+    await updateDoc(doc(db, 'products', id), {
+      name, category, model: cat ? cat.name : '', price, promoPrice, stock, updatedAt: serverTimestamp(),
+    });
+    showToast('Sabor salvo.');
+    closeModals();
+  } catch (err) {
+    showError('flavor-error', 'Erro ao salvar: ' + err.message);
+  } finally {
+    setBusy('flavor-save', false);
+  }
+});
+
+$('f-toggle').addEventListener('click', async () => {
+  const f = products.find(p => p.id === $('f-id').value);
+  if (!f) return;
+  const wasActive = f.active !== false;
+  try {
+    await updateDoc(doc(db, 'products', f.id), { active: !wasActive, updatedAt: serverTimestamp() });
+    showToast(wasActive ? 'Sabor pausado. Some do site até você reativar.' : 'Sabor reativado.');
+    closeModals();
+  } catch (err) {
+    showToast('Erro ao atualizar: ' + err.message, true);
+  }
+});
+
+$('f-delete').addEventListener('click', async () => {
+  const f = products.find(p => p.id === $('f-id').value);
+  if (!f) return;
+  if (!confirm(`Excluir o sabor "${f.name}"? Não dá pra desfazer.`)) return;
+  try {
+    await deleteDoc(doc(db, 'products', f.id));
+    showToast('Sabor excluído.');
+    closeModals();
+  } catch (err) {
+    showToast('Erro ao excluir: ' + err.message, true);
+  }
+});
 </script>
 </body>
 </html>

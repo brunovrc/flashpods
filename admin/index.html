@@ -540,6 +540,11 @@ main { max-width: 760px; margin: 0 auto; padding: 18px 16px 100px; }
         <input type="text" id="f-name" maxlength="60" required>
       </div>
       <div class="form-group">
+        <label class="form-label" for="f-pt">Descrição em português</label>
+        <textarea id="f-pt" rows="3" maxlength="300"></textarea>
+        <p class="field-hint">Aparece embaixo do sabor no site, com puffs e o que mais quiser. Se ficar vazio, entra a tradução automática que aparece no campo.</p>
+      </div>
+      <div class="form-group">
         <label class="form-label" for="f-cat">Modelo</label>
         <select id="f-cat"></select>
       </div>
@@ -633,6 +638,86 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str == null ? '' : String(str);
   return div.innerHTML;
+}
+
+/* Mesma tradução automática do site (index.html), pra mostrar aqui o que o cliente vê.
+   Mudou lá, muda aqui também.
+   Expressões de mais de uma palavra vêm primeiro pra "passion fruit" virar
+   maracujá antes de "fruit" ser lido sozinho. */
+const FLAVOR_PHRASES = [
+  ['passion fruit', 'maracujá'], ['dragon fruit', 'pitaya'], ['grape fruit', 'toranja'],
+  ['grapefruit', 'toranja'], ['green apple', 'maçã verde'], ['double apple', 'maçã dupla'],
+  ['coconut water', 'água de coco'], ['cherry cola', 'cola com cereja'], ['blue mint', 'menta azul'],
+  ['fanta grape', 'Fanta uva'], ['monster drink', 'energético'], ['bubble gum', 'chiclete'],
+  ['red bull', 'energético'], ['cotton candy', 'algodão doce'], ['ice cream', 'sorvete'],
+];
+const FLAVOR_WORDS = {
+  strawberry: 'morango', straw: 'morango', kiwi: 'kiwi', grape: 'uva', grapes: 'uva',
+  watermelon: 'melancia', watermellon: 'melancia', melon: 'melão', mint: 'menta', minty: 'menta',
+  spearmint: 'hortelã', peppermint: 'hortelã', menthol: 'mentol', blueberry: 'mirtilo',
+  pineapple: 'abacaxi', pineaple: 'abacaxi', apple: 'maçã', banana: 'banana', coconut: 'coco',
+  berry: 'frutas vermelhas', berries: 'frutas vermelhas', blackberry: 'amora', raspberry: 'framboesa',
+  cherry: 'cereja', cola: 'cola', 'açai': 'açaí', 'açaí': 'açaí', acai: 'açaí', peach: 'pêssego',
+  lemon: 'limão', lime: 'limão', orange: 'laranja', mango: 'manga', guava: 'goiaba', lychee: 'lichia',
+  papaya: 'mamão', bubblegum: 'chiclete', cappuccino: 'cappuccino', capuccino: 'cappuccino',
+  coffee: 'café', vanilla: 'baunilha', chocolate: 'chocolate', caramel: 'caramelo', tobacco: 'tabaco',
+  aloe: 'aloe vera', energy: 'energético', candy: 'bala', tea: 'chá', cream: 'creme', honey: 'mel',
+  pomegranate: 'romã', passionfruit: 'maracujá', tangerine: 'tangerina', plum: 'ameixa', pear: 'pera',
+};
+// Modificadores viram complemento no fim: "Grape Ice" → "Uva com gelo"
+const FLAVOR_MODS = {
+  ice: 'com gelo', icy: 'com gelo', iced: 'com gelo', frozen: 'com gelo', cool: 'com gelo',
+  sour: 'com toque azedo', fresh: 'refrescante', extreme: 'extra forte', winter: 'com gelo extra',
+  slush: 'raspadinha', mix: 'mix', sweet: 'doce',
+};
+
+function translateSegment(seg) {
+  let s = ' ' + seg.toLowerCase().replace(/[^a-zà-ú\s]/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+  const found = [];
+  FLAVOR_PHRASES.forEach(([en, pt]) => {
+    const i = s.indexOf(' ' + en + ' ');
+    if (i >= 0) { found.push([i, pt]); s = s.slice(0, i) + ' ' + '_'.repeat(en.length) + ' ' + s.slice(i + en.length + 2); }
+  });
+  const mods = [];
+  let pos = 0;
+  s.split(' ').forEach(w => {
+    const at = pos; pos += w.length + 1;
+    if (FLAVOR_WORDS[w]) found.push([at, FLAVOR_WORDS[w]]);
+    else if (FLAVOR_MODS[w]) mods.push(FLAVOR_MODS[w]);
+  });
+  const names = [...new Set(found.sort((a, b) => a[0] - b[0]).map(x => x[1]))];
+  if (!names.length) return null;
+  const uniqMods = [...new Set(mods)];
+  const list = names.length > 1 ? names.slice(0, -1).join(', ') + ' e ' + names[names.length - 1] : names[0];
+  let out = list;
+  if (uniqMods.includes('mix')) out = 'mix de ' + out;
+  if (uniqMods.includes('raspadinha')) out = 'raspadinha de ' + out;
+  const tail = uniqMods.filter(m => m !== 'mix' && m !== 'raspadinha');
+  if (tail.length) out += ' ' + tail.join(' ');
+  return out.charAt(0).toUpperCase() + out.slice(1);
+}
+
+function translateFlavor(name) {
+  const clean = String(name || '').normalize('NFKC');
+  if (/resist[êe]ncia|\bcoil\b/i.test(clean)) return '';
+  const parts = clean.split(/\s*\/{2,}\s*|\s+y\s+|\s*\+\s*/i).filter(p => p.trim());
+  const pt = parts.map(translateSegment);
+  if (pt.every(p => !p)) return '';
+  const out = pt.map((p, i) => p || parts[i].trim()).join(' / ');
+  // Sem tradução de verdade (Banana, Kiwi, Capuccino): não repete o nome embaixo
+  const bare = t => t.toLowerCase().replace(/[^a-zà-ú]/g, '').replace(/(.)\1+/g, '$1');
+  return bare(out) === bare(clean) ? '' : out;
+}
+
+/* Linha de baixo do sabor: a descrição que o dono escreveu (sem emojis, com
+   os puffs num formato só) ou, sem descrição, a tradução automática. */
+function flavorInfo(desc, name) {
+  const lines = String(desc || '').split(/\n+/).map(l => l.normalize('NFKC')
+    .replace(/\p{Extended_Pictographic}|️|‍/gu, '')
+    .replace(/\s*\/{2,}\s*/g, ' / ')
+    .replace(/(\d[\d.]*)\s*\.?\s*puffs?\b/gi, (m, n) => Number(n.replace(/\./g, '')).toLocaleString('pt-BR') + ' puffs')
+    .replace(/\s+/g, ' ').trim()).filter(Boolean);
+  return lines.length ? [...new Set(lines)].join(' · ') : translateFlavor(name);
 }
 
 function parseMoney(raw) {
@@ -940,6 +1025,8 @@ function flavorRowHtml(f, m) {
   const price = Number(f.price) || 0;
   const promo = f.promoPrice ? Number(f.promoPrice) : null;
   const subParts = [];
+  const pt = flavorInfo(f.description, f.name);
+  if (pt) subParts.push(escapeHtml(pt));
   if (promo) subParts.push(`${fmt(promo)} <span class="old">${fmt(price)}</span>`);
   else if (base == null || price !== base) subParts.push(fmt(price));
   if (paused) subParts.push('Pausado');
@@ -1339,6 +1426,8 @@ function openFlavorModal(id) {
   $('flavor-error').classList.remove('show');
   $('f-id').value = f.id;
   $('f-name').value = f.name || '';
+  $('f-pt').value = f.description || '';
+  $('f-pt').placeholder = translateFlavor(f.name) || 'Sem tradução automática';
   $('f-price').value = f.price ?? '';
   $('f-promo').value = f.promoPrice ?? '';
   $('f-stock').value = Math.max(0, Number(f.stock) || 0);
@@ -1355,6 +1444,10 @@ function openFlavorModal(id) {
     : '<i class="ph-pause-bold"></i> Pausar sabor';
   openModal('flavor-modal');
 }
+
+$('f-name').addEventListener('input', () => {
+  $('f-pt').placeholder = translateFlavor($('f-name').value) || 'Sem tradução automática';
+});
 
 $('flavor-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -1379,7 +1472,7 @@ $('flavor-form').addEventListener('submit', async (e) => {
   try {
     const cat = catById(category);
     await updateDoc(doc(db, 'products', id), {
-      name, category, model: cat ? cat.name : '', price, promoPrice, stock, updatedAt: serverTimestamp(),
+      name, description: $('f-pt').value.trim(), category, model: cat ? cat.name : '', price, promoPrice, stock, updatedAt: serverTimestamp(),
     });
     showToast('Sabor salvo.');
     closeModals();
